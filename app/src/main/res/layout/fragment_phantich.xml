@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:text="Phân tích"
+        android:id="@+id/textview_fragmentPhantich"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:maxLines="1"
+        android:autoSizeMaxTextSize="10sp"
+        android:autoSizeMinTextSize="4sp"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
+        android:background="@color/xam"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <ListView
+        android:dividerHeight="5dp"
+        android:id="@+id/listview_fragmentPhantich"
+        android:divider="@color/white"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="400dp"
+    android:background="@drawable/popupwindow_custom"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical" >
+    <TextView
+        android:text="Bố Cục"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:background="@drawable/textview_custom"
+        android:textColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <GridLayout
+        android:columnCount="2"
+        android:rowCount="4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/imageviewBocuc1"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:scaleType="fitCenter"
+            android:layout_gravity="fill"
+            android:layout_margin="5dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/bocuc1"/>
+        <ImageView
+            android:id="@+id/imageviewBocuc2"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:scaleType="fitCenter"
+            android:layout_gravity="fill"
+            android:layout_margin="5dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/bocuc2"/>
+        <ImageView
+            android:id="@+id/imageviewBocuc3"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:scaleType="fitCenter"
+            android:layout_gravity="fill"
+            android:layout_margin="5dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/bocuc3"/>
+        <ImageView
+            android:id="@+id/imageviewBocuc4"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_gravity="fill"
+            android:layout_margin="5dp"
+            android:scaleType="fitCenter"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/bocuc4"/>
+    </GridLayout>
+
+
+
+</LinearLayout>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable-v24/bluetoothdialog_custom.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/bg_round.xml" value="0.2703125" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/border_bangsolieu.xml" value="0.26614583333333336" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/close.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/custom_dialog_background.xml" value="0.19427083333333334" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/custom_dialog_shape.xml" value="0.19427083333333334" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/dialog_background.xml" value="0.15052083333333333" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/divider.xml" value="0.12916666666666668" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/divider_line.xml" value="0.26614583333333336" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/icon_chart.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/icon_menu.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/icon_number.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/popup_background.xml" value="0.8857142857142857" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/popup_divider.xml" value="0.14375" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/popupwindow_custom.xml" value="0.14635416666666667" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/drawable/textview_custom.xml" value="0.14375" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/bluetooth_fragment.xml" value="0.264" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/custom_popup_item.xml" value="0.176" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dialog_bluetooth.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dialog_bocuc.xml" value="0.136" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_caclanchay.xml" value="0.4" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_listviewcacsodo.xml" value="0.5100463678516228" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_listviewphantichtoado.xml" value="0.47058823529411764" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_popupwindowchonsodo.xml" value="0.4" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_scandevice.xml" value="0.22192028985507245" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_thanhcongcu.xml" value="0.32981530343007914" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dong_thietbidaketnoi.xml" value="0.25416666666666665" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/dothi_fragment.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bangsolieu.xml" value="0.22149837133550487" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_base_main.xml" value="0.536" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bluetooth.xml" value="0.25416666666666665" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc1.xml" value="0.13020833333333334" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc_1.xml" value="0.264" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc_2.xml" value="0.176" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc_3.xml" value="0.13020833333333334" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_bocuc_4.xml" value="0.176" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_chenhlech.xml" value="0.24451097804391217" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_chuso.xml" value="0.330188679245283" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_dodoc.xml" value="0.264" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_dothi.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_kieu_du_lieu.xml" value="0.536" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_phantich.xml" value="0.2418478260869565" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/fragment_toado.xml" value="0.2" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/menu_item_layout.xml" value="0.4" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popupwindow_bocuc.xml" value="0.4" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popupwindow_chonsodo.xml" value="0.47904191616766467" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popupwindow_phantich.xml" value="0.536" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popupwindow_solanchay.xml" value="0.152" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popwindow_chonhienthi.xml" value="0.4" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/popwindow_phantich.xml" value="0.25" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/progress_dialog.xml" value="0.25416666666666665" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/layout/viewtrong.xml" value="0.25271739130434784" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/menu/menu_chonsodo.xml" value="0.25416666666666665" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/menu/menu_kieuhienthi.xml" value="0.25416666666666665" />
+        <entry key="..\:/CETT/stem/Lap_trinh_android/Sensor_collection/app/src/main/res/menu/menu_tansolaymau.xml" value="0.264" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

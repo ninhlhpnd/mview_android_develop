@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/tanso1Hz"
+        android:title="1 Hz" />
+    <item android:id="@+id/tanso2Hz"
+        android:title="2 Hz" />
+    <item android:id="@+id/tanso5Hz"
+        android:title="5 Hz" />
+    <item android:id="@+id/tanso10Hz"
+        android:title="10 Hz" />
+    <item android:id="@+id/tanso20Hz"
+        android:title="20 Hz" />
+    <item android:id="@+id/tanso50Hz"
+        android:title="50 Hz" />
+    <item android:id="@+id/tanso100Hz"
+        android:title="100 Hz" />
+    <item android:id="@+id/tanso200Hz"
+        android:title="200 Hz" />
+    <item android:id="@+id/tanso500Hz"
+        android:title="500 Hz" />
+    <item android:id="@+id/tanso1000Hz"
+        android:title="1000 Hz" />
+</menu>

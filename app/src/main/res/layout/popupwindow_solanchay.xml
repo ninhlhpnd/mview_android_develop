@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:orientation="vertical"
+    android:background="@drawable/popupwindow_custom"
+    android:layout_height="match_parent">
+    <TextView
+        android:text="Các Lần Chạy"
+        android:textColor="@color/black"
+        android:background="@drawable/textview_custom"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/textviewEmpty_solanchay"
+        android:text="Chưa có lần chạy nào"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:visibility="gone"
+        android:background="@color/xam"
+        android:layout_width="match_parent"
+        android:padding="5dp"
+        android:alpha="0.5"
+        android:layout_height="wrap_content"/>
+
+    <ListView
+        android:id="@+id/listview_solanchay"
+        android:divider="@color/xanhduongnhat"
+        android:dividerHeight="1dp"
+        android:background="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

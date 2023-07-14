@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:weightSum="10"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/linearlayout1_bocuc2"
+        android:orientation="vertical"
+        android:layout_weight="4.975"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+
+    </LinearLayout>
+    <View
+        android:layout_weight="0.05"
+        android:background="@color/black"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"/>
+    <LinearLayout
+        android:id="@+id/linearlayout2_bocuc2"
+        android:orientation="vertical"
+        android:layout_weight="4.975"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+
+    </LinearLayout>
+    </LinearLayout>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">M-View</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="please_open_blue">Please open ble</string>
+    <string name="notifyTitle">Notify title</string>
+    <string name="gpsNotifyMsg">GPS</string>
+    <string name="cancel">Cancle</string>
+    <string name="setting">setting</string>
+</resources>
