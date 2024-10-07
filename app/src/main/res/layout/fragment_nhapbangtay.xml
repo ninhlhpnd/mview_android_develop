@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:weightSum="10"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:weightSum="10"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_weight="1.5"
+            android:weightSum="10"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+            <Button
+                android:id="@+id/buttonDulieux_fragmentNhapbangtay"
+                android:layout_weight="4"
+                android:backgroundTint="@color/xam"
+                android:text="x"
+                android:textColor="@color/black"
+                android:layout_width="0dp"
+                android:textAllCaps="false"
+                android:maxLines="1"
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="4sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
+                android:layout_marginRight="5dp"
+                android:layout_height="match_parent"/>
+            <Button
+                android:id="@+id/buttonDulieuy_fragmentNhapbangtay"
+                android:layout_weight="4"
+                android:backgroundTint="@color/xam"
+                android:text="y"
+                android:layout_marginLeft="5dp"
+                android:textColor="@color/black"
+                android:maxLines="1"
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="4sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
+                android:textAllCaps="false"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_weight="7.5"
+            android:background="@color/xanhduongnhat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+            <ListView
+                android:divider="@color/xanhduongnhat"
+                android:dividerHeight="1.0dp"
+                android:background="@color/white"
+                android:layout_margin="2dp"
+                android:minHeight="20dp"
+                android:id="@+id/listview_fragmentNhapbangtay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:weightSum="10"
+            android:orientation="horizontal"
+            android:layout_height="0dp">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/buttonTare_fragmentNhapbangtay"
+                android:layout_weight="2.5"
+                android:text="Tare"
+                android:textColor="@color/black"
+                android:layout_gravity="fill_vertical"
+                android:textAllCaps="false"
+                android:maxLines="1"
+                android:background="@drawable/button_custom"
+                android:autoSizeMaxTextSize="15sp"
+                android:autoSizeMinTextSize="4sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"/>
+            <ImageView
+                android:id="@+id/imageview_fragmentNhapbangtay"
+                android:background="#6FEA61"
+                android:src="@drawable/ic_check_fragmentnhapbangtay"
+                android:layout_weight="7.5"
+                android:layout_marginLeft="5dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="7"
+        android:orientation="vertical"
+        android:weightSum="10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.5"
+            android:weightSum="10">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/buttonPhantich_fragmentNhapbangtay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/xam"
+                    android:paddingBottom="5dp"
+                    android:text="Phân tích"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:weightSum="3"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Xác định độ dốc(y=mx+b)"
+                    android:textColor="@color/black"
+                    android:autoSizeMaxTextSize="15sp"
+                    android:autoSizeMinTextSize="4sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/textviewDodoc_fragment_nhapbangtay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="m=0"
+                    android:textColor="@color/black"
+                    android:autoSizeMaxTextSize="15sp"
+                    android:autoSizeMinTextSize="4sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/textviewoffset_fragment_nhapbangtay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="b=0"
+                    android:textColor="@color/black"
+                    android:autoSizeMaxTextSize="15sp"
+                    android:autoSizeMinTextSize="4sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/linechart_fragmentNhapbangtay"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8.5" />
+    </LinearLayout>
+</LinearLayout>

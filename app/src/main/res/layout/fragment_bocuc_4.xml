@@ -10,15 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <LinearLayout
+            android:id="@+id/linearlayout1_bocuc4"
+            android:orientation="vertical"
             android:layout_weight="4.975"
             android:layout_width="0dp"
             android:layout_height="match_parent">
-            <TextView
-                android:textSize="30sp"
-                android:text="Bo cuc 4"
-                android:textColor="@color/black"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
         </LinearLayout>
         <View
             android:layout_weight="0.05"
@@ -26,15 +23,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"/>
         <LinearLayout
+            android:id="@+id/linearlayout2_bocuc4"
+            android:orientation="vertical"
             android:layout_weight="4.975"
             android:layout_width="0dp"
             android:layout_height="match_parent">
-            <TextView
-                android:textSize="30sp"
-                android:text="Bo cuc 4"
-                android:textColor="@color/black"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
         </LinearLayout>
     </LinearLayout>
     <View
@@ -43,14 +37,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"/>
     <LinearLayout
+        android:id="@+id/linearlayout3_bocuc4"
+        android:orientation="vertical"
         android:layout_weight="4.95"
         android:layout_width="match_parent"
         android:layout_height="0dp">
-        <TextView
-            android:textSize="30sp"
-            android:text="Bo cuc 4"
-            android:textColor="@color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
     </LinearLayout>
     </LinearLayout>

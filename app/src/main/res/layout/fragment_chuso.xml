@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:weightSum="10"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
@@ -9,6 +10,7 @@
         android:textColor="@color/xanhdam"
         android:textSize="18sp"
         android:gravity="center"
+        android:layout_weight="0.5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -22,6 +24,18 @@
         android:autoSizeTextType="uniform"
         android:maxLines="1"
         android:gravity="center"
+        android:layout_weight="9"
         android:text="0.00"
         android:textColor="@color/black" />
+    <Button
+        android:id="@+id/buttonTare_fragmentchuso"
+        android:text="Tare"
+        android:textSize="15sp"
+        android:layout_weight="0.5"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:layout_marginLeft="5dp"
+        android:backgroundTint="@color/xam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

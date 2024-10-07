@@ -5,15 +5,12 @@
     android:weightSum="10"
     android:layout_height="match_parent">
     <LinearLayout
+        android:id="@+id/linearlayout1_bocuc3"
+        android:orientation="vertical"
         android:layout_weight="4.95"
         android:layout_width="match_parent"
         android:layout_height="0dp">
-        <TextView
-            android:textSize="30sp"
-            android:text="Bo cuc 3"
-            android:textColor="@color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
     </LinearLayout>
     <View
         android:layout_weight="0.1"
@@ -21,14 +18,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"/>
     <LinearLayout
+        android:id="@+id/linearlayout2_bocuc3"
+        android:orientation="vertical"
         android:layout_weight="4.95"
         android:layout_width="match_parent"
         android:layout_height="0dp">
-        <TextView
-            android:textSize="30sp"
-            android:text="Bo cuc 3"
-            android:textColor="@color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
     </LinearLayout>
     </LinearLayout>

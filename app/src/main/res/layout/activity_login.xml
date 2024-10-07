@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".LoginActivity">
+    <EditText
+        android:id="@+id/edtTendangnhap"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        android:hint="Tên Đăng Nhập"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/edtMatkhau"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        android:hint="Mật khẩu"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/buttonKichhoat"
+        android:text="Kích Hoạt"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/xanhduongnhat"
+        android:layout_marginTop="20dp"
+        android:textSize="20sp"
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

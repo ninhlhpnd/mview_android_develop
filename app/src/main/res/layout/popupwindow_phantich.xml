@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:weightSum="4"
+    android:weightSum="6"
     android:background="@drawable/popupwindow_custom"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -104,6 +104,62 @@
             android:layout_height="0dp"/>
         <Switch
             android:id="@+id/switchDodoc_phantich"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <View
+        android:background="@color/xanhduongnhat"
+        android:layout_width="200dp"
+        android:layout_height="1dp"/>
+    <LinearLayout
+        android:id="@+id/linearlayoutTrungbinh_phantich"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+        <TextView
+            android:text="Trung bình"
+            android:layout_marginLeft="5dp"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginRight="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <View
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+        <Switch
+            android:id="@+id/switchTrungbinh_phantich"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <View
+        android:background="@color/xanhduongnhat"
+        android:layout_width="200dp"
+        android:layout_height="1dp"/>
+    <LinearLayout
+        android:id="@+id/linearlayoutRms_phantich"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+        <TextView
+            android:text="RMS"
+            android:layout_marginLeft="5dp"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginRight="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <View
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+        <Switch
+            android:id="@+id/switchRms_phantich"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>

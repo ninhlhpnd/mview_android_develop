@@ -9,11 +9,14 @@
         android:orientation="vertical"
         android:layout_weight="1"
         android:layout_width="0dp"
+        android:weightSum="10"
         android:layout_height="match_parent">
         <FrameLayout
+            android:layout_weight="9"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp">
+
             <ListView
                 android:id="@+id/listview_fragmentdothi"
                 android:divider="@color/white"
@@ -26,6 +29,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </FrameLayout>
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="0dp">
+            <ImageView
+                android:id="@+id/imageviewZoomout_fragmentdothi"
+                android:src="@drawable/icon_zoomout"
+                android:scaleType="fitCenter"
+                android:background="@color/xam"
+                android:minWidth="25dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/imageviewGoptruc_fragmentdothi"
+                android:src="@drawable/icon_addchart"
+                android:scaleType="fitCenter"
+                android:background="@color/xam"
+                android:minWidth="25dp"
+                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
     </LinearLayout>
 
     <com.github.mikephil.charting.charts.LineChart

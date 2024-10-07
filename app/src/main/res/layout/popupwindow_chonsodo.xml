@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:background="@drawable/popupwindow_custom"
     android:layout_height="match_parent">
+
     <TextView
         android:text="Chọn Số Đo"
         android:textColor="@color/black"

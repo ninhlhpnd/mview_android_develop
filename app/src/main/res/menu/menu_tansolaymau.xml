@@ -20,4 +20,10 @@
         android:title="500 Hz" />
     <item android:id="@+id/tanso1000Hz"
         android:title="1000 Hz" />
+    <item android:id="@+id/tanso2000Hz"
+        android:title="2000 Hz" />
+    <item android:id="@+id/tanso5000Hz"
+        android:title="5000 Hz" />
+    <item android:id="@+id/tanso10000Hz"
+        android:title="10000 Hz" />
 </menu>
