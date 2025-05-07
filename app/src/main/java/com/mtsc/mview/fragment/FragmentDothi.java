@@ -43,6 +43,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
     FragmentDodoc fragmentDodoc;
     FragmentTrungbinh fragmentTrungbinh;
     FragmentRms fragmentRms;
+    FragmentHambac2 fragmentBac2;
     Fragment currentFragment;
     FragmentManager fragmentManager;
     int soDothi = 0;
@@ -103,6 +105,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         fragmentDodoc = new FragmentDodoc();
         fragmentTrungbinh = new FragmentTrungbinh();
         fragmentRms = new FragmentRms();
+        fragmentBac2 = new FragmentHambac2();
         fragmentManager = getChildFragmentManager();
 
         FragmentBaseMain fragmentBaseMain = (FragmentBaseMain) getParentFragment();
@@ -360,6 +363,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
                                 }
                                 ytb = ytb / yValues.length;
                                 listener.guiGiatriphantich(line, ymin, ymax, ytb);
+
                             }
                             lineChart.notifyDataSetChanged();
                             lineChart.invalidate();
@@ -420,6 +424,70 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
                                 yRms = (float) Math.sqrt(yRms / yValues.length);
                                 listener.guiGiatriphantich(line, yRms, yPeak, null);
 
+                            }
+                            lineChart.notifyDataSetChanged();
+                            lineChart.invalidate();
+                        }
+                        if (kieuPhantich == 6) {
+                            float xTouch = motionEvent.getX();
+                            float yTouch = motionEvent.getY();
+                            MPPointD point = lineChart.getValuesByTouchPoint(xTouch, yTouch, YAxis.AxisDependency.LEFT);
+                            float xValue = (float) point.x;
+                            LineData data = lineChart.getLineData();
+                            IDataSet dataSet = data.getDataSetByIndex(0);
+                            Entry closestEntry = dataSet.getEntryForXValue(xValue, Float.NaN, DataSet.Rounding.CLOSEST);
+                            float closestX = closestEntry.getX();
+
+                            LimitLine limit1 = lineChart.getXAxis().getLimitLines().get(0);
+                            LimitLine limit2 = lineChart.getXAxis().getLimitLines().get(1);
+                            float distanceTolimit1 = Math.abs(limit1.getLimit() - closestX);
+                            float distanceTolimit2 = Math.abs(limit2.getLimit() - closestX);
+                            LimitLine closeLimit = new LimitLine(closestX, "");
+                            closeLimit.setLineColor(Color.BLACK);
+                            closeLimit.setLineWidth(1f);
+
+                            if (distanceTolimit1 <= distanceTolimit2) {
+                                lineChart.getXAxis().removeLimitLine(limit1);
+                                lineChart.getXAxis().addLimitLine(closeLimit);
+
+                            } else {
+                                lineChart.getXAxis().removeLimitLine(limit2);
+                                lineChart.getXAxis().addLimitLine(closeLimit);
+                            }
+                            LimitLine gioihan1 = lineChart.getXAxis().getLimitLines().get(0);
+                            LimitLine gioihan2 = lineChart.getXAxis().getLimitLines().get(1);
+                            float xmax = Math.max(gioihan1.getLimit(), gioihan2.getLimit());
+                            float xmin = Math.min(gioihan1.getLimit(), gioihan2.getLimit());
+
+                            for (int line = 0; line < soDothi; line++) {
+                                List<Entry> dataPoint = new ArrayList<>();
+                                for (int i = 0; i < dataSets.get(line).getEntryCount(); i++) {
+                                    Entry entry = data.getDataSetByIndex(line).getEntryForIndex(i);
+                                    if (entry.getX() >= xmin && entry.getX() <= xmax) {
+                                        dataPoint.add(entry);
+                                    }
+                                }
+                                double[] xValues = new double[dataPoint.size()];
+                                double[] yValues = new double[dataPoint.size()];
+                                for (int i = 0; i < dataPoint.size(); i++) {
+                                    Entry entry = dataPoint.get(i);
+                                    xValues[i] = entry.getX();
+                                    yValues[i] = entry.getY();
+                                }
+//                                float ymin = (float) yValues[0], ymax = (float) yValues[0], yRms = 0;
+//                                for (int i = 0; i < yValues.length; i++) {
+//                                    if (ymax < yValues[i]) ymax = (float) yValues[i];
+//                                    if (ymin > yValues[i]) ymin = (float) yValues[i];
+//                                    yRms += yValues[i] * yValues[i];
+//                                }
+//                                float yPeak = ymax - ymin;
+//                                yRms = (float) Math.sqrt(yRms / yValues.length);
+//                                listener.guiGiatriphantich(line, yRms, yPeak, null);
+                                double[] coefficients = quadraticRegressionExact(xValues, yValues);
+                                double a = coefficients[0];
+                                double b = coefficients[1];
+                                double c = coefficients[2];
+                                listener.guiGiatriphantich(line, (float) a, (float) b, (float)c);
                             }
                             lineChart.notifyDataSetChanged();
                             lineChart.invalidate();
@@ -751,6 +819,28 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
             transaction.commit();
             currentFragment = fragmentRms;
         }
+        if (phantich == 6) {
+            float xmin = lineChart.getLowestVisibleX();
+            float xmax = lineChart.getHighestVisibleX();
+            LimitLine limitLine1 = new LimitLine(xmin, "");
+            limitLine1.setLineColor(Color.BLACK);
+            limitLine1.setLineWidth(1f);
+            LimitLine limitLine2 = new LimitLine(xmax, "");
+            limitLine2.setLineColor(Color.BLACK);
+            limitLine2.setLineWidth(1f);
+            lineChart.getXAxis().addLimitLine(limitLine1);
+            lineChart.getXAxis().addLimitLine(limitLine2);
+            lineChart.notifyDataSetChanged();
+            lineChart.invalidate();
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList("sodo", (ArrayList<? extends Parcelable>) dulieuDothis);
+            fragmentBac2.setArguments(bundle);
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.layoutPhantich_fragmentdothi, fragmentBac2);
+            transaction.commit();
+            currentFragment = fragmentBac2;
+        }
     }
 
 
@@ -818,5 +908,85 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
     // Cài đặt phương thức của interface để truyền dữ liệu sang Fragment con
     public void setOnPhantichDothi(PhantichDothi listener) {
         this.listener = listener;
+    }
+    public static double[] quadraticRegressionExact(double[] x, double[] y) {
+        int n = x.length;
+
+        // Tính các tổng
+        double sumX = 0, sumY = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
+        double sumXY = 0, sumX2Y = 0;
+
+        for (int i = 0; i < n; i++) {
+            double xi = x[i];
+            double yi = y[i];
+            double xi2 = xi * xi;
+            double xi3 = xi2 * xi;
+            double xi4 = xi3 * xi;
+
+            sumX += xi;
+            sumY += yi;
+            sumX2 += xi2;
+            sumX3 += xi3;
+            sumX4 += xi4;
+            sumXY += xi * yi;
+            sumX2Y += xi2 * yi;
+        }
+
+        // Hệ phương trình
+        double[][] coefficients = {
+                {sumX4, sumX3, sumX2},
+                {sumX3, sumX2, sumX},
+                {sumX2, sumX, n}
+        };
+
+        double[] constants = {sumX2Y, sumXY, sumY};
+
+        // Giải hệ phương trình
+        return solveLinearSystem(coefficients, constants);
+    }
+
+    private static double[] solveLinearSystem(double[][] A, double[] B) {
+        int n = B.length;
+        double[] result = new double[n];
+
+        // Gauss Elimination
+        for (int i = 0; i < n; i++) {
+            // Tìm hàng lớn nhất
+            int max = i;
+            for (int j = i + 1; j < n; j++) {
+                if (Math.abs(A[j][i]) > Math.abs(A[max][i])) {
+                    max = j;
+                }
+            }
+
+            // Hoán đổi hàng
+            double[] temp = A[i];
+            A[i] = A[max];
+            A[max] = temp;
+
+            double tmp = B[i];
+            B[i] = B[max];
+            B[max] = tmp;
+
+            // Khử Gauss
+            for (int j = i + 1; j < n; j++) {
+                double factor = A[j][i] / A[i][i];
+                B[j] -= factor * B[i];
+                for (int k = i; k < n; k++) {
+                    A[j][k] -= factor * A[i][k];
+                }
+            }
+        }
+
+        // Back Substitution
+        for (int i = n - 1; i >= 0; i--) {
+            double sum = 0;
+            for (int j = i + 1; j < n; j++) {
+                sum += A[i][j] * result[j];
+            }
+            result[i] = (B[i] - sum) / A[i][i];
+        }
+
+        return result;
     }
 }

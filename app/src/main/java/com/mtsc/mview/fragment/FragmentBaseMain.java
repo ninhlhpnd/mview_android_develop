@@ -61,7 +61,8 @@ public class FragmentBaseMain extends Fragment {
     List<DulieuCacCamBien> listDulieucaccambien;
     List<String> listsolanchay;
     private Float tansolaymau;
-    Boolean stateSwtoado = false, stateSwchenhlech = false, stateSwdodoc = false, stateSwtrungbinh = false, stateSwRms = false;
+    Boolean stateSwtoado = false, stateSwchenhlech = false, stateSwdodoc = false, stateSwtrungbinh = false, stateSwRms = false,
+    stateSwBac2 = false;
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -190,7 +191,7 @@ public class FragmentBaseMain extends Fragment {
         ListView lvSodo = (ListView) popupView.findViewById(R.id.listview_chonsodo);
         TextView txtEmpty = (TextView) popupView.findViewById(R.id.textviewEmpty_chonsodo);
         if (MainActivity.isConnectedUSB) {
-            chonsodoAdapterUSB chonsodoAdapterUSB = new chonsodoAdapterUSB(getContext(), R.layout.dong_popupwindowchonsodo, MainActivity.tbScansUsb);
+            chonsodoAdapterUSB chonsodoAdapterUSB = new chonsodoAdapterUSB(getContext(), R.layout.dong_popupwindowchonsodo, MainActivity.soCambienUSB);
             lvSodo.setAdapter(chonsodoAdapterUSB);
         } else {
             chonsodoAdapter chonsodoAdapter = new chonsodoAdapter(getContext(), R.layout.dong_popupwindowchonsodo, MainActivity.sodoCambienList);
@@ -207,12 +208,10 @@ public class FragmentBaseMain extends Fragment {
                 double[] daido = new double[2];
                 for (CamBien cb : Uuid.camBiens
                 ) {
-
                     if (cb.getName().equals(tencambien)) {
                         daido = cb.getDaido();
                         break;
                     }
-
                 }
 //                BleDevice bleDevice=MainActivity.tbKetnois.get(i);
                 popupWindow.dismiss();
@@ -281,6 +280,7 @@ public class FragmentBaseMain extends Fragment {
         Switch swDodoc = (Switch) popupView.findViewById(R.id.switchDodoc_phantich);
         Switch swTrungbinh = (Switch) popupView.findViewById(R.id.switchTrungbinh_phantich);
         Switch swRms = (Switch) popupView.findViewById(R.id.switchRms_phantich);
+        Switch swBac2 = (Switch) popupView.findViewById(R.id.switchBac2_phantich);
         swToado.setChecked(stateSwtoado);
         swChenhlech.setChecked(stateSwchenhlech);
         swDodoc.setChecked(stateSwdodoc);
@@ -298,6 +298,7 @@ public class FragmentBaseMain extends Fragment {
                     swDodoc.setChecked(false);
                     swTrungbinh.setChecked(false);
                     swRms.setChecked(false);
+                    swBac2.setChecked(false);
                     listener.phantichDothi(1);
                 } else {
                     listener.phantichDothi(0);
@@ -314,6 +315,7 @@ public class FragmentBaseMain extends Fragment {
                     swDodoc.setChecked(false);
                     swTrungbinh.setChecked(false);
                     swRms.setChecked(false);
+                    swBac2.setChecked(false);
                     listener.phantichDothi(2);
                 } else {
                     listener.phantichDothi(0);
@@ -329,6 +331,7 @@ public class FragmentBaseMain extends Fragment {
                     swChenhlech.setChecked(false);
                     swTrungbinh.setChecked(false);
                     swRms.setChecked(false);
+                    swBac2.setChecked(false);
                     listener.phantichDothi(3);
                 } else {
                     listener.phantichDothi(0);
@@ -344,6 +347,7 @@ public class FragmentBaseMain extends Fragment {
                     swChenhlech.setChecked(false);
                     swDodoc.setChecked(false);
                     swRms.setChecked(false);
+                    swBac2.setChecked(false);
                     listener.phantichDothi(4);
                 } else {
                     listener.phantichDothi(0);
@@ -359,7 +363,24 @@ public class FragmentBaseMain extends Fragment {
                     swChenhlech.setChecked(false);
                     swDodoc.setChecked(false);
                     swTrungbinh.setChecked(false);
+                    swBac2.setChecked(false);
                     listener.phantichDothi(5);
+                } else {
+                    listener.phantichDothi(0);
+                }
+            }
+        });
+        swBac2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
+                stateSwBac2 = b;
+                if (b) {
+                    swToado.setChecked(false);
+                    swChenhlech.setChecked(false);
+                    swDodoc.setChecked(false);
+                    swTrungbinh.setChecked(false);
+                    swRms.setChecked(false);
+                    listener.phantichDothi(6);
                 } else {
                     listener.phantichDothi(0);
                 }
@@ -406,11 +427,11 @@ public class FragmentBaseMain extends Fragment {
             listsolanchay.add("Lần " + new DecimalFormat("#").format(lanchay));
         } else {
             listener.onDataReceived(dulieucaccambien);
-//                Float[] mangnewValue = dulieucaccambien.getGiatricambien();
-//                for (Float newValue:mangnewValue
-//                     ) {
-//                    listDulieucaccambien.add(new DulieuCacCamBien((int) MainActivity.solanchay,tansolaymau,dulieucaccambien.getMacambien(),newValue));
-//                }
+//            List<Float> mangnewValue = dulieucaccambien.getGiatricambien();
+//            for (Float newValue : mangnewValue
+//            ) {
+//                listDulieucaccambien.add(new DulieuCacCamBien((int) MainActivity.solanchay, tansolaymau, dulieucaccambien.getMacambien(), newValue));
+//            }
         }
     }
 

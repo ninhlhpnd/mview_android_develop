@@ -93,8 +93,16 @@
                             android:text="Độ to: "
                             android:textColor="#000000" />
                     </LinearLayout>
-
-
+                    <SeekBar
+                        android:id="@+id/seekbarAmthanh_fragmentsongam"
+                        android:max="5"
+                        android:min="1"
+                        android:background="@color/xanhduongnhat"
+                        android:thumbTint="@color/btnStop"
+                        android:progressTint="@color/btnStop"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp" />
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout

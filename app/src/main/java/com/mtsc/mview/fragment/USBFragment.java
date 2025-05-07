@@ -286,6 +286,7 @@ public class USBFragment extends DialogFragment {
         }
         try {
             MainActivity.tbScansUsb.clear();
+            MainActivity.soCambienUSB.clear();
             usbSerialPort.write(data, WRITE_WAIT_MILLIS);
         } catch (Exception e) {
 //            onRunError(e);

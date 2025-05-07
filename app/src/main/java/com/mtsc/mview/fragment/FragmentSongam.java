@@ -58,8 +58,10 @@ public class FragmentSongam extends Fragment {
     LinearLayout layoutToado;
     DecimalFormat df2, df3, df1;
     Spinner spinner;
-    int MAX_VALUES = 512;
-    boolean isTansoSongam=true;
+    int MAX_VALUES = 1000;
+    boolean isTansoSongam = true;
+    SeekBar seekBar;
+
     public FragmentSongam(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }
@@ -91,13 +93,17 @@ public class FragmentSongam extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 String selectedItem = adapterView.getItemAtPosition(position).toString();
-                if(selectedItem.equals("Tần số sóng âm")){
-                    isTansoSongam=true;
+                if (selectedItem.equals("Tần số sóng âm")) {
+                    isTansoSongam = true;
+                    dataSets.get(0).clear();
                     YAxis leftAxis = lineChart.getAxisLeft();
                     leftAxis.setAxisMaximum(4f);
                     leftAxis.setAxisMinimum(0f);
-                }else if(selectedItem.equals("Tốc độ truyền âm")){
-                    isTansoSongam=false;
+                    XAxis x1 = lineChart.getXAxis();
+                    x1.setAxisMaximum(0.2f);
+                    x1.setSpaceMin(0.001f);
+                } else if (selectedItem.equals("Tốc độ truyền âm")) {
+                    isTansoSongam = false;
                     dataSets.get(0).clear();
                     YAxis leftAxis = lineChart.getAxisLeft();
                     leftAxis.setAxisMaximum(100f);
@@ -110,20 +116,41 @@ public class FragmentSongam extends Fragment {
 
             }
         });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float[] range = {0.2f, 0.1f, 0.05f, 0.02f, 0.01f};
+                if (isTansoSongam) {
+                    lineChart.getXAxis().setAxisMaximum(range[progress - 1]);
+                    lineChart.notifyDataSetChanged();
+                    lineChart.invalidate();
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     private void anhXa(View view) {
         lineChart = (LineChart) view.findViewById(R.id.linechart_fragmentsongam);
         txtBiendo = (TextView) view.findViewById(R.id.textviewBiendo_fragmentsongam);
         txtTanso = (TextView) view.findViewById(R.id.textviewTanso_fragmentsongam);
-        txtDoto=(TextView) view.findViewById(R.id.textviewDoto_fragmentsongam);
+        txtDoto = (TextView) view.findViewById(R.id.textviewDoto_fragmentsongam);
         spinner = view.findViewById(R.id.spinner_fragmentsongam);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.songamLession, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         layoutToado = (LinearLayout) view.findViewById(R.id.layoutToado_fragmentsongam);
-
+        seekBar = (SeekBar) view.findViewById(R.id.seekbarAmthanh_fragmentsongam);
         dataSets = new ArrayList<>();
         mangSongam = new ArrayList<>();
         df2 = new DecimalFormat("#.00");
@@ -162,8 +189,8 @@ public class FragmentSongam extends Fragment {
         x1.setAvoidFirstLastClipping(true);
         x1.setEnabled(true);
         x1.setAxisMinimum(0f);
-        x1.setAxisMaximum((float) (MAX_VALUES * 0.001));
-        x1.setSpaceMin(0.01f);
+        x1.setAxisMaximum(0.2f);
+        x1.setSpaceMin(0.001f);
 
         YAxis leftAxis = lineChart.getAxisLeft();
         leftAxis.setTextColor(Color.BLACK);
@@ -222,8 +249,8 @@ public class FragmentSongam extends Fragment {
             float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
             leftAxis.setAxisMinimum(minY);
             leftAxis.setAxisMaximum(maxY);
-            if(!isTansoSongam){
-                lineChart.getXAxis().setAxisMaximum(xValueMax+1f);
+            if (!isTansoSongam) {
+                lineChart.getXAxis().setAxisMaximum(xValueMax + 1f);
             }
 //            lineChart.getAxisRight().setAxisMaximum(maxY);
 //            lineChart.getAxisRight().setAxisMinimum(minY);
@@ -273,66 +300,80 @@ public class FragmentSongam extends Fragment {
             mangSongam.clear();
             List<Float> value = dulieuCB.getGiatricambien();
             dataSets.get(0).clear();
-            if(isTansoSongam){
-                lineChart.getXAxis().setAxisMaximum(value.get(1)/1000.0f * MAX_VALUES);
-            }else{
+            if (isTansoSongam) {
+//                lineChart.getXAxis().setAxisMaximum(value.get(1) / 1000.0f * MAX_VALUES);
+            } else {
                 lineChart.getXAxis().setAxisMaximum(10f);
             }
 
         } else {
 
-                if (dulieuCB.getTencambien().equals("Tần số")) {
-                    List<Float> value = dulieuCB.getGiatricambien();
-                    for (float yvalue : value
-                    ) {
-                        mangSongam.add(yvalue);
-                    }
-                    if (mangSongam.size() >= MAX_VALUES) {
-                        double[] sinwave = fft(mangSongam, MainActivity.tansoLayMau / 1000.0, MAX_VALUES);
-                        if(isTansoSongam){
-                            dataSets.get(0).clear();
-                            List<Entry> apentry = new ArrayList<>();
-                            for (int i = 0; i < MAX_VALUES; i++) {
-                                float xvalue = (float) (i * MainActivity.tansoLayMau / 1000.0);
-                                float yvalue = (float) mangSongam.get(i);
-                                apentry.add(new Entry(xvalue, yvalue));
-                            }
-                            addEntry(dataSets.get(0), apentry);
-                        }else{
-                            float xvalue = (float) dataSets.get(0).getEntryCount()*0.1f;
-                            float yvalue = (float) sinwave[2];
-                            List<Entry> entry = new ArrayList<>();
-                            entry.add(new Entry(xvalue,yvalue));
-                            addEntry(dataSets.get(0),entry);
-                        }
+            if (dulieuCB.getTencambien().equals("Tần số")) {
+                List<Float> value = dulieuCB.getGiatricambien();
+                float tanso = value.get(0);
+                float maxvalue = value.get(1);
+                float minvalue = value.get(2);
+                float zerovalue = (minvalue + maxvalue) / 2;
+                float biendo = (maxvalue - minvalue) / 2;
+                float phase = (float) ((-1 + Math.random() * 2) * 2 * Math.PI);
+                double A_min = 0.0;
+                double A_max = 1.65;
+                double min_dB = 40.0;
+                double max_dB = 100.0;
+                int decibel = (int) convertAmplitudeToDecibel(biendo, A_min, A_max, min_dB, max_dB);
 
-
-                        mangSongam.clear();
+                float step = lineChart.getXAxis().getAxisMaximum() / MAX_VALUES;
+                if (isTansoSongam) {
+                    dataSets.get(0).clear();
+                    List<Entry> apentry = new ArrayList<>();
+                    for (int i = 0; i < MAX_VALUES; i++) {
+                        float xvalue = (i * step);
+                        float yvalue = (float) (biendo * Math.sin(2 * Math.PI * tanso * xvalue + phase) + zerovalue);
+                        apentry.add(new Entry(xvalue, yvalue));
                     }
+                    addEntry(dataSets.get(0), apentry);
                 }
+                else {
+                    List<Entry> apentry = new ArrayList<>();
+                    float xValue = (float) dataSets.get(0).getEntryCount() * 0.1f;
+                    float yValue = (float) decibel;
+                    apentry.add(new Entry(xValue, yValue));
+                    addEntry(dataSets.get(0), apentry);
+                }
+                txtTanso.setText("Tần số: " + df2.format(tanso) + "Hz");
+                txtBiendo.setText("Biên độ: " + df2.format(biendo) + "V");
+                txtDoto.setText("Độ to: " + decibel + "dB");
+//                for (float yvalue : value
+//                ) {
+//                    mangSongam.add(yvalue);
+//                }
+//                if (mangSongam.size() >= MAX_VALUES) {
+//                    double[] sinwave = fft(mangSongam, MainActivity.tansoLayMau / 1000.0, MAX_VALUES);
+//                    if (isTansoSongam) {
+//                        dataSets.get(0).clear();
+//                        List<Entry> apentry = new ArrayList<>();
+//                        for (int i = 0; i < MAX_VALUES; i++) {
+//                            float xvalue = (float) (i * MainActivity.tansoLayMau / 1000.0);
+//                            float yvalue = (float) mangSongam.get(i);
+//                            apentry.add(new Entry(xvalue, yvalue));
+//                        }
+//                        addEntry(dataSets.get(0), apentry);
+//                    } else {
+//                        float xvalue = (float) dataSets.get(0).getEntryCount() * 0.1f;
+//                        float yvalue = (float) sinwave[2];
+//                        List<Entry> entry = new ArrayList<>();
+//                        entry.add(new Entry(xvalue, yvalue));
+//                        addEntry(dataSets.get(0), entry);
+//                    }
+//
+//
+//                    mangSongam.clear();
+//                }
+            }
 
         }
     }
 
-    private float RMSCalculate(List<Entry> dataPoint) {
-        float yrms = 0;
-        double[] xValues = new double[dataPoint.size()];
-        double[] yValues = new double[dataPoint.size()];
-        for (int i = 0; i < dataPoint.size(); i++) {
-            Entry entry = dataPoint.get(i);
-            xValues[i] = entry.getX();
-            yValues[i] = entry.getY();
-        }
-        float ymin = (float) yValues[0], ymax = (float) yValues[0];
-        for (int i = 0; i < yValues.length; i++) {
-            if (ymax < yValues[i]) ymax = (float) yValues[i];
-            if (ymin > yValues[i]) ymin = (float) yValues[i];
-            yrms += yValues[i] * yValues[i];
-        }
-        float yPeak = ymax - ymin;
-        yrms = (float) Math.sqrt(yrms / yValues.length);
-        return yrms;
-    }
 
     private static double findPhase(double[] t, double[] y, double A, double f) {
         double phi = 0;
@@ -406,12 +447,13 @@ public class FragmentSongam extends Fragment {
 //        Log.d("songam", "Biên độ ước tính: " + A_estimated);
         txtTanso.setText("Tần số: " + df2.format(f_estimated) + "Hz");
         txtBiendo.setText("Biên độ: " + df2.format(A_estimated) + "V");
-        txtDoto.setText("Độ to: " + (int)decibel + "dB");
+        txtDoto.setText("Độ to: " + (int) decibel + "dB");
         sinewave[0] = A_estimated;
         sinewave[1] = f_estimated;
         sinewave[2] = decibel;
         return sinewave;
     }
+
     public double convertAmplitudeToDecibel(double amplitude, double minAmplitude, double maxAmplitude, double minDecibel, double maxDecibel) {
         return minDecibel + (amplitude - minAmplitude) / (maxAmplitude - minAmplitude) * (maxDecibel - minDecibel);
     }

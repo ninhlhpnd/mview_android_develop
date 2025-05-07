@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/popupwindow_custom"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical" >
+    <TextView
+        android:text="Thư mục"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:background="@drawable/textview_custom"
+        android:textColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:id="@+id/linearlayoutMofile_popupfile"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:gravity="center_vertical"
+        android:layout_height="40dp">
+        <ImageView
+
+            android:src="@drawable/open_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+        <TextView
+            android:text="Mở file"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:paddingLeft="20dp"
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+    <View
+        android:background="@color/xanhnhat"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"/>
+    <LinearLayout
+        android:id="@+id/linearlayoutLuufile_popupfile"
+
+        android:padding="5dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/save_icon" />
+        <TextView
+            android:text="Lưu file"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:paddingLeft="20dp"
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+
+</LinearLayout>

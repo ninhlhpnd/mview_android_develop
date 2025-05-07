@@ -19,66 +19,58 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentChenhlech extends Fragment implements FragmentDothi.PhantichDothi {
+public class FragmentHambac2 extends Fragment implements FragmentDothi.PhantichDothi {
     private View layout;
     ListView lvToado;
     List<DulieuDothi> dulieuDothiList;
     TextView txtPhantich;
     DulieuPhantichAdapter dulieuPhantichAdapter;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        layout = inflater.inflate(R.layout.fragment_phantich,container, false);
+        layout = inflater.inflate(R.layout.fragment_phantich, container, false);
         return layout;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        lvToado=(ListView) view.findViewById(R.id.listview_fragmentPhantich);
-        txtPhantich=(TextView )view.findViewById(R.id.textview_fragmentPhantich);
-        txtPhantich.setText("Chênh Lệch");
-        dulieuDothiList=new ArrayList<>();
+        lvToado = (ListView) view.findViewById(R.id.listview_fragmentPhantich);
+        txtPhantich = (TextView) view.findViewById(R.id.textview_fragmentPhantich);
+        txtPhantich.setText("Trung Bình");
+        dulieuDothiList = new ArrayList<>();
         Bundle bundle = getArguments();
         if (bundle != null) {
             dulieuDothiList = bundle.getParcelableArrayList("sodo");
             // Sử dụng danh sách myList ở đây
         }
-        FragmentDothi fragmentDothi= (FragmentDothi) getParentFragment();
-        if(fragmentDothi!=null){
+        FragmentDothi fragmentDothi = (FragmentDothi) getParentFragment();
+        if (fragmentDothi != null) {
             fragmentDothi.setOnPhantichDothi(this);
         }
-        dulieuPhantichAdapter=new DulieuPhantichAdapter(getContext(),R.layout.dong_listviewphantichtoado,dulieuDothiList);
+        dulieuPhantichAdapter = new DulieuPhantichAdapter(getContext(), R.layout.dong_listviewphantichtoado, dulieuDothiList);
         lvToado.setAdapter(dulieuPhantichAdapter);
     }
 
     @Override
-    public void guiGiatriphantich(int position, Float giatri1, Float giatri2,  Float giatri3) {
+    public void guiGiatriphantich(int position, Float giatri1, Float giatri2, Float giatri3) {
         View view = lvToado.getChildAt(position);
         TextView txtGiatri1 = (TextView) view.findViewById(R.id.txtGiatri1_donglvphantichtoado);
         TextView txtGiatri2 = (TextView) view.findViewById(R.id.txtGiatri2_donglvphantichtoado);
         TextView txtGiatri3 = (TextView) view.findViewById(R.id.txtGiatri3_donglvphantichtoado);
-        String donvi= dulieuDothiList.get(position).getDonvi();
 
-        DecimalFormat df1=new DecimalFormat("#.0");
-        DecimalFormat df2=new DecimalFormat("#.00");
-        DecimalFormat df3=new DecimalFormat("#.000");
+        String donvi = dulieuDothiList.get(position).getDonvi();
+        DecimalFormat df1 = new DecimalFormat("#.0");
+        DecimalFormat df2 = new DecimalFormat("#.00");
+        DecimalFormat df3 = new DecimalFormat("#.000");
 
         df1.setMinimumIntegerDigits(1);
         df2.setMinimumIntegerDigits(1);
         df3.setMinimumIntegerDigits(1);
-        String cambien = dulieuDothiList.get(position).getTencambien();
-        if(cambien=="Vị trí"){
-            txtGiatri1.setText("x=" + df2.format(giatri1).replace(',', '.') + " s");
-            txtGiatri2.setText("y=" + df1.format(giatri2).replace(',', '.') + " " + donvi);
-        }else if(cambien=="Dòng điện" || cambien == "Điện áp" || cambien == "pH"){
-            txtGiatri1.setText("x=" + df3.format(giatri1).replace(',', '.') + " s");
-            txtGiatri2.setText("y=" + df3.format(giatri2).replace(',', '.') + " "+donvi);
-        }else{
-            txtGiatri1.setText("x=" + df3.format(giatri1).replace(',', '.') + " s");
-            txtGiatri2.setText("y=" + df2.format(giatri2).replace(',', '.') + " "+ donvi);
-        }
 
-        txtGiatri3.setVisibility(View.INVISIBLE);
+        txtGiatri1.setText("a(x^2)=" + df2.format(giatri1).replace(',', '.'));
+        txtGiatri2.setText("b(x)=" + df2.format(giatri2).replace(',', '.'));
+        txtGiatri3.setText("c=" + df2.format(giatri3).replace(',', '.'));
     }
 }

@@ -1,43 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
     <View
         android:id="@+id/view_donglistviewcacsodo"
-        android:background="@color/xanhdam"
-
         android:layout_width="match_parent"
-        android:layout_height="5dp"/>
+
+        android:layout_height="5dp"
+        android:background="@color/xanhdam" />
+
     <TextView
         android:id="@+id/textview_dongCacsodo"
         android:layout_width="match_parent"
-        android:text="Nhiệt độ"
-        android:maxLines="1"
         android:layout_height="wrap_content"
         android:autoSizeMaxTextSize="10sp"
         android:autoSizeMinTextSize="4sp"
         android:autoSizeStepGranularity="1sp"
         android:autoSizeTextType="uniform"
-        android:textColor="#000000"
-        android:gravity="center"
         android:background="@color/xam"
+        android:gravity="center"
+        android:maxLines="1"
         android:padding="2dp"
-        />
+        android:text="Nhiệt độ"
+        android:textColor="#000000" />
+
     <TextView
         android:id="@+id/textviewMa_dongCacsodo"
         android:layout_width="match_parent"
-        android:text="Nhiệt độ"
-        android:maxLines="1"
         android:layout_height="wrap_content"
         android:autoSizeMaxTextSize="10sp"
         android:autoSizeMinTextSize="4sp"
         android:autoSizeStepGranularity="1sp"
         android:autoSizeTextType="uniform"
-        android:textColor="#000000"
-        android:gravity="center"
         android:background="@color/xam"
+        android:gravity="center"
+        android:maxLines="1"
         android:padding="2dp"
-        />
+        android:text="Nhiệt độ"
+        android:textColor="#000000" />
 
 </LinearLayout>

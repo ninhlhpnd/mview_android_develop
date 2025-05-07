@@ -36,4 +36,7 @@ public class DulieuCB {
         this.tencambien = tencambien;
         this.giatricambien = giatricambien;
     }
+    public void addValues(Float value) {
+        giatricambien.add(value);
+    }
 }

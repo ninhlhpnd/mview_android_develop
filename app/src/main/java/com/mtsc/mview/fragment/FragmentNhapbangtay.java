@@ -52,6 +52,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.jtransforms.fft.DoubleFFT_1D;
 import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
@@ -497,12 +498,8 @@ public class FragmentNhapbangtay extends Fragment {
 //                    Log.d("size", String.valueOf(mangValue.size()));
                 }
                 if (mangValueX.size() >= 200) {
-                    float tongRms = 0;
-                    for (int i = 0; i < mangValueX.size(); i++) {
-                        tongRms += (mangValueX.get(i)) * (mangValueX.get(i));
-                    }
-                    rmsFastX = (float) ((float) Math.sqrt(tongRms / mangValueX.size()));
-                    rmsFastX = (float) dataProcessorX.filter(rmsFastX);
+                    rmsFastX = rms(mangValueX);
+//                    rmsFastX = (float) dataProcessorX.filter(rmsFastX);
                     DecimalFormat df;
                     if (tencambienX.equals("Dòng điện")) {
                         df = new DecimalFormat("#.000");
@@ -511,6 +508,8 @@ public class FragmentNhapbangtay extends Fragment {
                     }
                     df.setMinimumIntegerDigits(1);
                     String dfdulieu = df.format(rmsFastX).replace(',', '.');
+//                    Log.d("mangValueX", "Danh sách 200 phần tử: " + mangValueX.toString());
+
                     nhapbangtayList.get(position).setDulieux(dfdulieu);
                     mangValueX.clear();
                 }
@@ -537,15 +536,13 @@ public class FragmentNhapbangtay extends Fragment {
                 ) {
                     float value = (float) (slopeY * x + offsetY);
                     mangvalueY.add(value);
-//                    Log.d("size", String.valueOf(mangValue.size()));
+
+//                    Log.d("value", String.valueOf(mangvalueY));
                 }
                 if (mangvalueY.size() >= 200) {
-                    float tongRms = 0;
-                    for (int i = 0; i < mangvalueY.size(); i++) {
-                        tongRms += (mangvalueY.get(i)) * (mangvalueY.get(i));
-                    }
-                    rmsFastY = (float) ((float) Math.sqrt(tongRms / mangvalueY.size()));
-                    rmsFastY = (float) dataProcessorY.filter(rmsFastY);
+
+                    rmsFastY = (float) rms(mangvalueY);
+//                    rmsFastY = (float) dataProcessorY.filter(rmsFastY);
                     DecimalFormat df;
                     if (tencambienY.equals("Dòng điện")) {
                         df = new DecimalFormat("#.000");
@@ -567,5 +564,22 @@ public class FragmentNhapbangtay extends Fragment {
         super.onStop();
         EventBus.getDefault().unregister(this);
 //        Log.d("life","onstop");
+    }
+    private float rms(List<Float> value) {
+        float rms=0;
+//        float average = 0;
+//        for (float val : value) {
+//            average += val;
+//        }
+//        average /= value.size();
+//        for (int i = 0; i < value.size(); i++) {
+//            value.set(i, value.get(i) - average);
+//        }
+        for(float val : value){
+            rms += val * val;
+        }
+        rms /= value.size();
+        rms = (float) Math.sqrt(rms);
+        return rms;
     }
 }

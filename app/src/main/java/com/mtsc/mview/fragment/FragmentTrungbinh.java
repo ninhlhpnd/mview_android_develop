@@ -70,16 +70,16 @@ public class FragmentTrungbinh extends Fragment implements FragmentDothi.Phantic
         if(dulieuDothiList.get(position).getTencambien()=="Vị trí"){
             txtGiatri1.setText("min=" + df1.format(giatri1).replace(',', '.') + " "+ donvi);
             txtGiatri2.setText("max=" + df1.format(giatri2).replace(',', '.') + " " + donvi);
-            txtGiatri3.setText("TB=" + df1.format(giatri2).replace(',', '.') + " " + donvi);
+            txtGiatri3.setText("TB=" + df1.format(giatri3).replace(',', '.') + " " + donvi);
 
         }else if(dulieuDothiList.get(position).getTencambien()=="Dòng điện"){
             txtGiatri1.setText("min=" + df3.format(giatri1).replace(',', '.') + " "+ donvi);
             txtGiatri2.setText("max=" + df3.format(giatri2).replace(',', '.') + " " + donvi);
-            txtGiatri3.setText("TB=" + df3.format(giatri2).replace(',', '.') + " " + donvi);
+            txtGiatri3.setText("TB=" + df3.format(giatri3).replace(',', '.') + " " + donvi);
         }else{
             txtGiatri1.setText("min=" + df2.format(giatri1).replace(',', '.') + " "+ donvi);
             txtGiatri2.setText("max=" + df2.format(giatri2).replace(',', '.') + " " + donvi);
-            txtGiatri3.setText("TB=" + df2.format(giatri2).replace(',', '.') + " " + donvi);
+            txtGiatri3.setText("TB=" + df2.format(giatri3).replace(',', '.') + " " + donvi);
         }
 
     }

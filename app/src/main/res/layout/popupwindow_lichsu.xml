@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/popupwindow_custom">
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:text="Lịch Sử"
+        android:textColor="@color/white"
+        android:background="@drawable/textview_custom"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageOpen_lichsu"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/open_icon"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:contentDescription="Open" />
+
+        <ImageView
+            android:id="@+id/imageSave_lichsu"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/save_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:contentDescription="Save" />
+
+    </RelativeLayout>
+    <!-- Nội dung chính: Text rỗng + ListView -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
+
+        <!-- Text hiển thị khi không có dữ liệu -->
+        <TextView
+            android:id="@+id/textviewEmpty_lichsu"
+            android:text="Chưa có lần chạy nào"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:background="@color/xam"
+            android:alpha="0.5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp" />
+
+        <!-- Danh sách -->
+        <ListView
+            android:id="@+id/listview_lichsu"
+            android:divider="@color/xanhduongnhat"
+            android:dividerHeight="1dp"
+            android:background="@android:color/transparent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <!-- 2 nút ở dưới chia đều 2 bên -->
+
+
+
+
+</LinearLayout>

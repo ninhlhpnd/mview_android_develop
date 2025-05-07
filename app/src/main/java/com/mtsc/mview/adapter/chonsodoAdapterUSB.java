@@ -15,15 +15,16 @@ import androidx.appcompat.widget.PopupMenu;
 import com.mtsc.mview.R;
 import com.mtsc.mview.model.CamBienUSB;
 import com.mtsc.mview.model.SodoCambien;
+import com.mtsc.mview.model.sodoCambienUSB;
 
 import java.util.List;
 
 public class chonsodoAdapterUSB extends BaseAdapter {
     private Context context;
     private int layout;
-    private List<CamBienUSB> sodoList;
+    private List<sodoCambienUSB> sodoList;
 
-    public chonsodoAdapterUSB(Context context, int layout, List<CamBienUSB> sodoList) {
+    public chonsodoAdapterUSB(Context context, int layout, List<sodoCambienUSB> sodoList) {
         this.context = context;
         this.layout = layout;
         this.sodoList = sodoList;
@@ -65,11 +66,11 @@ public class chonsodoAdapterUSB extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }
-        CamBienUSB thietbi = sodoList.get(i);
-        viewHolder.txtMacambien.setText(thietbi.getCamBien().getId() + "-" + thietbi.getId());
-        viewHolder.imgIcon.setImageResource(thietbi.getCamBien().getIcon());
-        viewHolder.txtTen.setText(thietbi.getCamBien().getName());
-        viewHolder.btnChondonvi.setText(thietbi.getCamBien().getDonvi()[0]);
+        sodoCambienUSB thietbi = sodoList.get(i);
+        viewHolder.txtMacambien.setText(thietbi.macambien + "-" + thietbi.getId());
+        viewHolder.imgIcon.setImageResource(thietbi.getIcon());
+        viewHolder.txtTen.setText(thietbi.getTencambien());
+        viewHolder.btnChondonvi.setText(thietbi.getDonvi()[0]);
 
 
         viewHolder.btnChondonvi.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +78,7 @@ public class chonsodoAdapterUSB extends BaseAdapter {
             public void onClick(View view) {
                 PopupMenu popupMenu = new PopupMenu(context, view);
 
-                for (String donvi : thietbi.getCamBien().getDonvi()
+                for (String donvi : thietbi.getDonvi()
                 ) {
                     popupMenu.getMenu().add(donvi);
                 }

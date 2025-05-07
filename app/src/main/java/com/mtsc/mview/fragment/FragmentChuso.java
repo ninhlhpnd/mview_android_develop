@@ -104,7 +104,7 @@ public class FragmentChuso extends Fragment implements FragmentBaseMain.OnDataCh
                 valueSlow = (float) (slope * dulieu.get(dulieu.size() - 1) + offset);
                 String[] parts = macambien.split("-");
                 DecimalFormat df;
-                if (tencambien.equals("Dòng điện")) {
+                if (tencambien.equals("Dòng điện") || tencambien.equals("Điện áp") || tencambien.equals("pH")) {
                     df = new DecimalFormat("#.000");
                 } else {
                     df = new DecimalFormat("#.00");

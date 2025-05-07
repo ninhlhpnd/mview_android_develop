@@ -1,5 +1,6 @@
 package com.mtsc.mview;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,20 +21,28 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
@@ -46,6 +56,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mtsc.mview.adapter.LichsuAdapter;
 import com.mtsc.mview.adapter.thanhcongcuAdapter;
 import com.mtsc.mview.fragment.BluetoothFragment;
 import com.mtsc.mview.fragment.CalibFragment;
@@ -62,18 +73,32 @@ import com.mtsc.mview.model.CamBienUSB;
 import com.mtsc.mview.model.ConnectedDevice;
 import com.mtsc.mview.model.CustomProber;
 import com.mtsc.mview.model.DulieuCB;
+import com.mtsc.mview.model.DulieuCacCamBien;
 import com.mtsc.mview.model.KalmanFilterWrapper;
 import com.mtsc.mview.model.ListItemUSB;
+import com.mtsc.mview.model.Run;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.model.SodoCambien;
+import com.mtsc.mview.model.sodoCambienUSB;
 import com.mtsc.mview.model.thanhcongcuClass;
 import com.mtsc.mview.my_interface.ItemClickListener;
 import com.mtsc.mview.ultis.DataEvent;
 import com.mtsc.mview.ultis.Uuid;
 
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -100,16 +125,21 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public static float thoigian = 0;
     public static double tansoLayMau = 1000;
     public static float solanchay = 0;
+    public List<Run> allRuns;
     Timer timer1;
     public static boolean isConnectedUSB = false;
     public static UsbSerialPort usbSerialPort;
     public static List<CamBienUSB> tbScansUsb;
+    public static List<sodoCambienUSB> soCambienUSB;
     public static List<ListItemUSB> tbUSB;
+    List<DulieuCacCamBien> listDulieucaccambien;
     private SerialInputOutputManager usbIoManager;
 
     //    public static List<KalmanFilterWrapper> kalmanFilterWrapperList;
     private static String[] PERMISSIONS_STORAGE = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_PRIVILEGED};
     private static String[] PERMISSIONS_LOCATION = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_PRIVILEGED};
+    private static final int REQUEST_WRITE_PERMISSION = 100;
+
     private static final int WRITE_WAIT_MILLIS = 2000;
     private boolean haveSTX = false, haveETX = false, firstNibble_ = false, isDataReceiving = false;
     private int inputPos = 0, currentByte;
@@ -149,7 +179,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         }
                         btnStart.setText("Dừng Lại");
                         solanchay++;
-
+                        Run currentRun = new Run((int) solanchay, tansoLayMau);
+                        allRuns.add(currentRun);
                         List<Float> manglanchay = new ArrayList<>();
                         manglanchay.add(solanchay);
                         manglanchay.add((float) tansoLayMau);
@@ -161,7 +192,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
                         for (ConnectedDevice connectedDevice : tbKetnois) {
                             final BleDevice bleDevice = connectedDevice.getDevice();
+//                            SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
 
+//                            if (sensorData == null) {
+                            SensorData sensorData = new SensorData(connectedDevice.getDevice().getName());
+                            currentRun.addSensorData(sensorData);
+//                            }
+//                            SensorData finalSensorData = sensorData;
                             BleManager.getInstance().write(connectedDevice.getDevice(), connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
                                 @Override
                                 public void onWriteSuccess(int current, int total, byte[] justWrite) {
@@ -186,7 +223,9 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
                                             if (data != null) {
                                                 if (data[0] == 0x02 && data[data.length - 1] == 0x03) {
-//
+//                                                    for(int i=0;i<data.length;i++){
+//                                                        Log.d("dulieu",String.valueOf(data[i]));
+//                                                    }
                                                     if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
                                                         List<Float> mangAp = new ArrayList<>();
                                                         List<Float> mangDong = new ArrayList<>();
@@ -241,11 +280,14 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
                                                         for (int i = 0; i < (data.length - 2) / 4; i++) {
                                                             float value = ByteBuffer.wrap(data, i * 4 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        kalmanFilterWrapperList.get(vitri).update(value);
-//                                                        mangValue[i] = kalmanFilterWrapperList.get(vitri).getFilteredValue();
                                                             mangValue.add(value);
-                                                            Log.d("data", String.valueOf(value));
+//                                                            if(listDulieucaccambien.size()<=10000) {
+//                                                                listDulieucaccambien.add(new DulieuCacCamBien(1, (float) tansoLayMau, bleDevice.getName(), value));
+//                                                            }
+//                                                            Log.d("data", String.valueOf(value));
+                                                            sensorData.addValue(value);
                                                         }
+
                                                         DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
                                                         EventBus.getDefault().post(new DataEvent(dulieuCB1));
                                                     }
@@ -306,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                                 send(senddata);
                                 chayCambien = (chayCambien + 1) % tbScansUsb.size();
                             }
-                        }, 0, (long) (tansoLayMau/tbScansUsb.size()));
+                        }, 0, (long) (tansoLayMau / tbScansUsb.size()));
 
                     }
                 } else {
@@ -314,6 +356,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                     int colorXanh = ContextCompat.getColor(getBaseContext(), R.color.xanhduongnhat);
                     btnStart.setBackgroundColor(colorXanh);
                     btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_start, 0, 0, 0);
+                    listDulieucaccambien.clear();
                     if (!isConnectedUSB) {
                         byte[] byteArray = new byte[6];
                         byteArray[0] = 0x02;
@@ -418,6 +461,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         thanhcongcuClasses.add(new thanhcongcuClass(3, R.drawable.home, "Home"));
         thanhcongcuClasses.add(new thanhcongcuClass(4, R.drawable.tool, "Công cụ"));
         thanhcongcuClasses.add(new thanhcongcuClass(5, R.drawable.bocuc, "Bố cục"));
+        thanhcongcuClasses.add(new thanhcongcuClass(6, R.drawable.file_icon, "Lịch sử"));
+
         thanhcongcuAdapter = new thanhcongcuAdapter(getApplicationContext(), thanhcongcuClasses, this);
         recyclerViewThanhcongcu.setHasFixedSize(true);
         recyclerViewThanhcongcu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -448,7 +493,10 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         btnChontanso = (Button) findViewById(R.id.buttonChontanso_mainActivity);
         tbUSB = new ArrayList<>();
         tbScansUsb = new ArrayList<>();
+        soCambienUSB = new ArrayList<>();
+        listDulieucaccambien = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper());
+        allRuns = new ArrayList<>();
         initUSB();
     }
 
@@ -480,6 +528,10 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                 hienThiBocuc(view);
                 break;
             }
+            case 6: {
+                hienThiFile(view);
+                break;
+            }
         }
     }
 
@@ -505,6 +557,164 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
     private void quayVeHome() {
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
+    }
+
+    private void hienThiFile(View view) {
+        LayoutInflater inflater = (LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popupwindow_lichsu, null);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) view.getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.heightPixels;
+        int maxHeight = screenWidth *2/ 3;
+
+        ListView lvSolanchay = (ListView) popupView.findViewById(R.id.listview_lichsu);
+        TextView txtEmpty = (TextView) popupView.findViewById(R.id.textviewEmpty_lichsu);
+        ImageView imgOpen = (ImageView) popupView.findViewById(R.id.imageOpen_lichsu);
+        ImageView imgSave = (ImageView) popupView.findViewById(R.id.imageSave_lichsu);
+
+        LichsuAdapter lichsuAdapter = new LichsuAdapter(getBaseContext(), R.layout.dong_lichsu, allRuns);
+        lichsuAdapter.setOnItemActionListener(new LichsuAdapter.OnItemActionListener() {
+            @Override
+            public void onItemClick(int position) {
+                Toast.makeText(getBaseContext(), "Chon lan " + (position + 1), Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onDeleteClick(int position) {
+                allRuns.remove(position);
+                lichsuAdapter.notifyDataSetChanged();
+            }
+        });
+        lvSolanchay.setEmptyView(txtEmpty);
+
+        lvSolanchay.setAdapter(lichsuAdapter);
+
+        PopupWindow popupWindow;
+        if (allRuns.size() > 4) {
+            popupWindow = new PopupWindow(popupView, 400, maxHeight, true);
+
+        } else {
+            popupWindow = new PopupWindow(popupView, 400, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        }
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.showAsDropDown(view);
+        imgOpen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                lichsu.add("lan" + lichsu.size());
+//                lichsuAdapter.notifyDataSetChanged();
+//                int newHeight = (lichsu.size() > 4) ? maxHeight : ViewGroup.LayoutParams.WRAP_CONTENT;
+//                popupWindow.update(400, newHeight);
+            }
+        });
+        imgSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSaveDialog(MainActivity.this);
+            }
+        });
+    }
+
+    public void showSaveDialog(Context context) {
+        // Tạo AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Lưu file");
+
+        // Tạo EditText để nhập tên file
+        final EditText input = new EditText(context);
+        input.setHint("Nhập tên file");
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // Nút Lưu
+        builder.setPositiveButton("Lưu", (dialog, which) -> {
+            String fileName = input.getText().toString().trim();
+            if (!fileName.isEmpty()) {
+                // Gọi phương thức lưu file Excel
+                exportToExcel(context, fileName, listDulieucaccambien);
+            } else {
+                Toast.makeText(context, "Tên file không được để trống", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Nút Hủy
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    public void exportToExcel(Context context, String fileName, List<DulieuCacCamBien> dataList) {
+        // Kiểm tra và yêu cầu quyền bộ nhớ ngoài
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
+            return;
+        }
+
+        // Tạo Workbook và Sheet
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Sensor Data");
+        if (allRuns.isEmpty()) return;
+
+        int sensorCount = allRuns.get(0).getSensors().size();
+        int groupSize = sensorCount + 1;
+        Row headerRow1 = sheet.createRow(0);
+        int col = 0;
+        for (int i = 0; i < allRuns.size(); i++) {
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, col, col + groupSize - 1));
+            Cell cell = headerRow1.createCell(col);
+            cell.setCellValue("Chạy " + allRuns.get(i).getRunNumber());
+            col += groupSize;
+        }
+        Row headerRow2 = sheet.createRow(1);
+        col = 0;
+        for (Run run : allRuns) {
+            headerRow2.createCell(col++).setCellValue("Thời gian (s)");
+            for (SensorData sensor : run.getSensors()) {
+                headerRow2.createCell(col++).setCellValue(sensor.getSensorName() + " (DV)");
+            }
+        }
+        int maxRowCount = 0;
+        for (Run run : allRuns) {
+            for (SensorData sensor : run.getSensors()) {
+                maxRowCount = Math.max(maxRowCount, sensor.values.size());
+            }
+        }
+
+        for (int rowIdx = 0; rowIdx < maxRowCount; rowIdx++) {
+            Row row = sheet.getRow(rowIdx + 2);
+            if (row == null) row = sheet.createRow(rowIdx + 2);
+
+            col = 0;
+            for (Run run : runList) {
+                double timeStep = 1.0 / run.frequency;
+                row.createCell(col++).setCellValue(rowIdx * timeStep);
+
+                for (SensorData sensor : run.sensors) {
+                    if (rowIdx < sensor.values.size()) {
+                        row.createCell(col++).setCellValue(sensor.values.get(rowIdx));
+                    } else {
+                        row.createCell(col++).setBlank(); // nếu thiếu giá trị thì để trống
+                    }
+                }
+            }
+        }
+        // Lưu Workbook vào bộ nhớ ngoài
+        try {
+            File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS); // an toàn hơn
+            File file = new File(downloadsDir, fileName + ".xlsx");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            workbook.write(outputStream);
+            workbook.close();
+            outputStream.close();
+            Toast.makeText(context, "Đã lưu file tại: " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void hienThiBocuc(View view) {
@@ -624,17 +834,17 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         return (first << 4) | second;
     }
 
-    public int firstNibble(int what) {
+    public static int firstNibble(int what) {
         int c = (what >> 4);
         return ((c << 4) | (c ^ 0x0F));
     }
 
-    public int secondNibble(int what) {
+    public static int secondNibble(int what) {
         int c = (what & 0x0F);
         return ((c << 4) | (c ^ 0x0F));
     }
 
-    public int crc8(byte[] data, int length) {
+    public static int crc8(byte[] data, int length) {
         int crc = 0;  // Khởi tạo CRC
         for (int j = 0; j < length; j++) {
             int inbyte = data[j] & 0xFF;  // Chuyển byte thành int không dấu
@@ -663,13 +873,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 //        for (byte inByte : data) {
 //            Log.d("data", Integer.toHexString(inByte).toUpperCase());
 //        }
-        Log.d("data", isConnected + "");
+//        Log.d("data", isConnected + "");
         if (isConnected) {
             usbIoManager = new SerialInputOutputManager(usbSerialPort, new SerialInputOutputManager.Listener() {
                 @Override
                 public void onNewData(byte[] data) {
-                    String hex = HexDump.dumpHexString(data);
-                    Log.d("data", hex + " Length: " + data.length);
+//                    String hex = HexDump.dumpHexString(data);
+//                    Log.d("data", hex + " Length: " + data.length);
                     byte[] dataByte = new byte[100];
                     for (byte inByte : data) {
                         int unsignedInByte = inByte & 0xFF;
@@ -719,21 +929,31 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         }
                     }
                     if (isDataReceiving) {
-//                        for (int i = 0; i < inputPos - 1; i++) {
-//                            Log.d("data", Integer.toHexString(dataByte[i]).toUpperCase());
-//                        }
+                        for (int i = 0; i < inputPos - 1; i++) {
+                            Log.d("data", dataByte[i] + "");
+                        }
                         if (dataByte[0] == 0) {
                             if (dataByte[1] == 1) {
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        for(CamBienUSB tbScan:tbScansUsb){
-                                            if(tbScan.getCamBien().getName().equals(Uuid.camBiens.get((int) dataByte[3] - 1).getName()) &&
-                                                    tbScan.getId() == (int) dataByte[2]){
+                                        for (CamBienUSB tbScan : tbScansUsb) {
+                                            if (tbScan.getCamBien().getName().equals(Uuid.camBiens.get((int) dataByte[3] - 1).getName()) &&
+                                                    tbScan.getId() == (int) dataByte[2]) {
                                                 return;
                                             }
                                         }
-                                        tbScansUsb.add(new CamBienUSB(Uuid.camBiens.get((int) dataByte[3] - 1), (int) dataByte[2]));
+                                        CamBien cambien = Uuid.camBiens.get((int) dataByte[3] - 1);
+                                        if (dataByte[3] == 2) {
+
+                                            soCambienUSB.add(new sodoCambienUSB(cambien.getId(), (int) dataByte[2], Uuid.Temp,
+                                                    Uuid.dvTemp, Uuid.iconDevice[0], Uuid.hesoTemp, Uuid.tansoTemp, 1));
+                                            soCambienUSB.add(new sodoCambienUSB(cambien.getId(), (int) dataByte[2], Uuid.Humid,
+                                                    Uuid.dvHumid, Uuid.iconDevice[1], Uuid.hesoHumid, Uuid.tansoHumid, 1));
+                                        } else {
+                                            soCambienUSB.add(new sodoCambienUSB(cambien.getId(), (int) dataByte[2], cambien.getName(), cambien.getDonvi(), cambien.getIcon(), cambien.getHeso(), cambien.getTanso(), 2));
+                                        }
+                                        tbScansUsb.add(new CamBienUSB(cambien, (int) dataByte[2]));
                                         USBFragment.tbScanAdapterUSB.notifyDataSetChanged();
                                     }
                                 });
@@ -743,37 +963,105 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                             if (dataByte[1] == 2) {
                                 int cambien = dataByte[3];
                                 int thuTuCambien = dataByte[2];
-                                List<Byte> receivedData = new ArrayList<>();
-                                for (int i = 4; i < inputPos - 1; i++) {
-                                    receivedData.add(dataByte[i]);
-
-                                }
-                                byte[] dataReceived = new byte[receivedData.size()];
-                                for (int i = 0; i < receivedData.size(); i++) {
-                                    dataReceived[i] = receivedData.get(i);
-                                }
-                                List<Float> mangValue = new ArrayList<>();
-                                for (int i = 0; i < receivedData.size() / 4; i++) {
-                                    float value = ByteBuffer.wrap(dataReceived, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                    mangValue.add(value);
-                                    Log.d("data", value + "");
-                                }
-                                if (tbScansUsb.size() > 0) {
-                                    int vitri = 0;
-                                    for (int i = 0; i < tbScansUsb.size(); i++) {
-                                        if (tbScansUsb.get(i).getCamBien().getId().equals(Uuid.camBiens.get(cambien - 1).getId()) &&
-                                                tbScansUsb.get(i).getId() == thuTuCambien) {
-                                            vitri = i;
-                                        }
+                                if (cambien == 2) {
+                                    int length = dataByte[4];  // Lấy độ dài từ msg[4]
+                                    StringBuilder decodedString = new StringBuilder();
+                                    for (int i = 0; i < length; i++) {
+                                        decodedString.append((char) dataByte[i + 5]);
                                     }
-                                    String deviceId = tbScansUsb.get(vitri).getCamBien().getId() + "-" + tbScansUsb.get(vitri).getId();
-                                    DulieuCB dulieuCB1 = new DulieuCB(deviceId, tbScansUsb.get(vitri).getCamBien().getName(), mangValue);
-                                    EventBus.getDefault().post(new DataEvent(dulieuCB1));
+
+                                    String result = decodedString.toString();
+                                    Log.d("data", result);
+                                    String nhietdo = "0.00";
+                                    int lengthNhietdo = dataByte[5 + length];
+                                    StringBuilder nhietdoString = new StringBuilder();
+                                    for (int i = 0; i < lengthNhietdo; i++) {
+                                        nhietdoString.append((char) dataByte[i + 6 + length]);
+                                    }
+                                    nhietdo = nhietdoString.toString();
+                                    List<Float> mangValue = new ArrayList<>();
+                                    try {
+                                        float value = Float.parseFloat(result);
+                                        mangValue.add(value);
+
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Chuỗi không hợp lệ để chuyển thành float.");
+                                    }
+                                    List<Float> mangNhietdo = new ArrayList<>();
+                                    try {
+                                        float value = Float.parseFloat(nhietdo);
+                                        mangNhietdo.add(value);
+
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Chuỗi không hợp lệ để chuyển thành float.");
+                                    }
+                                    if (tbScansUsb.size() > 0) {
+                                        int vitri = 0;
+                                        for (int i = 0; i < tbScansUsb.size(); i++) {
+                                            if (tbScansUsb.get(i).getCamBien().getId().equals(Uuid.camBiens.get(1).getId()) &&
+                                                    tbScansUsb.get(i).getId() == thuTuCambien) {
+                                                vitri = i;
+                                            }
+                                        }
+                                        String deviceId = tbScansUsb.get(vitri).getCamBien().getId() + "-" + tbScansUsb.get(vitri).getId();
+                                        DulieuCB dulieuCB1 = new DulieuCB(deviceId, Uuid.Humid, mangValue);
+                                        EventBus.getDefault().post(new DataEvent(dulieuCB1));
+                                        DulieuCB dulieuNhietdo = new DulieuCB(deviceId, Uuid.Temp, mangNhietdo);
+                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
+                                    }
+                                } else {
+                                    int length = dataByte[4];  // Lấy độ dài từ msg[4]
+                                    StringBuilder decodedString = new StringBuilder();
+                                    for (int i = 0; i < length; i++) {
+                                        decodedString.append((char) dataByte[i + 5]);
+                                    }
+
+                                    String result = decodedString.toString();
+                                    Log.d("data", result);
+                                    List<Float> mangValue = new ArrayList<>();
+                                    try {
+                                        float value = Float.parseFloat(result);
+                                        mangValue.add(value);
+
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Chuỗi không hợp lệ để chuyển thành float.");
+                                    }
+                                    if (tbScansUsb.size() > 0) {
+                                        int vitri = 0;
+                                        for (int i = 0; i < tbScansUsb.size(); i++) {
+                                            if (tbScansUsb.get(i).getCamBien().getId().equals(Uuid.camBiens.get(cambien - 1).getId()) &&
+                                                    tbScansUsb.get(i).getId() == thuTuCambien) {
+                                                vitri = i;
+                                            }
+                                        }
+                                        String deviceId = tbScansUsb.get(vitri).getCamBien().getId() + "-" + tbScansUsb.get(vitri).getId();
+                                        DulieuCB dulieuCB1 = new DulieuCB(deviceId, tbScansUsb.get(vitri).getCamBien().getName(), mangValue);
+                                        EventBus.getDefault().post(new DataEvent(dulieuCB1));
+                                    }
                                 }
+
+
+//                                List<Byte> receivedData = new ArrayList<>();
+//                                for (int i = 4; i < inputPos - 1; i++) {
+//                                    receivedData.add(dataByte[i]);
+//
+//                                }
+//                                byte[] dataReceived = new byte[receivedData.size()];
+//                                for (int i = 0; i < receivedData.size(); i++) {
+//                                    dataReceived[i] = receivedData.get(i);
+//                                }
+
+//                                for (int i = 0; i < receivedData.size() / 4; i++) {
+////                                    float value = ByteBuffer.wrap(dataReceived, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+////                                    mangValue.add(value);
+////                                    Log.d("data", value + "");
+//                                }
+
 //                                Log.d("data", receivedData.toString());
                             }
-                            isDataReceiving = false;
+
                         }
+                        isDataReceiving = false;
                     }
                 }
 

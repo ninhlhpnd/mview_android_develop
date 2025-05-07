@@ -44,6 +44,7 @@ import org.jtransforms.fft.DoubleFFT_1D;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FragmentMachDienXC extends Fragment {
@@ -623,9 +624,28 @@ public class FragmentMachDienXC extends Fragment {
                     double[] sinwave = fft(entryListAp, (MainActivity.tansoLayMau / 1000.0), MAX_VALUES);
                     dataSets.get(0).clear();
                     List<Entry> apentry = new ArrayList<>();
+
+                    int signalType = (int) sinwave[3]; // Loại tín hiệu
                     for (int i = 0; i < MAX_VALUES; i++) {
                         float xvalue = (float) (i * (MainActivity.tansoLayMau / 1000.0));
-                        float yvalue = (float) (sinwave[0] * Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2]));
+                        float sinValue = (float) Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2]);
+                        float yvalue;
+
+                        switch (signalType) {
+                            case 0: // Hình sin chuẩn
+                                yvalue = (float) (sinwave[0] * sinValue);
+                                break;
+                            case 1: // Chỉnh lưu đơn (Giữ nguyên phần dương, phần âm thành 0)
+                                yvalue = (sinValue >= 0) ? (float) (sinwave[0] * sinValue) : 0;
+                                break;
+                            case 2: // Chỉnh lưu cầu (Lấy tuyệt đối)
+                                yvalue = (float) (sinwave[0] * Math.abs(sinValue));
+                                break;
+                            case 3: // Tín hiệu gần 0
+                            default:
+                                yvalue = 0; // Đường phẳng
+                                break;
+                        }
                         apentry.add(new Entry(xvalue, yvalue));
                     }
                     addEntry(dataSets.get(0), apentry);
@@ -676,19 +696,32 @@ public class FragmentMachDienXC extends Fragment {
     }
 
     private double[] fft(List<Float> value, double sampleTime, int length) {
-        double[] sinewave = new double[3];
+        float average = 0;
+        for (float val : value) {
+            average += val;
+        }
+        average /= value.size();
+        for (int i = 0; i < value.size(); i++) {
+            value.set(i, value.get(i) - average);
+        }
+
+        double[] sinewave = new double[4];
         DoubleFFT_1D fft = new DoubleFFT_1D(length);
-        double[] fftData = new double[2 * length];  // FFT sử dụng mảng phức
+        double[] fftData = new double[2 * length];
         double[] y = new double[length];
         double[] t = new double[length];
+
         for (int i = 0; i < length; i++) {
             y[i] = (double) value.get(i);
             t[i] = i * sampleTime;
         }
+
         System.arraycopy(y, 0, fftData, 0, length);
         fft.realForwardFull(fftData);
+
         double[] freqs = new double[length / 2];
         double[] magnitudes = new double[length / 2];
+
         for (int i = 0; i < length / 2; i++) {
             double real = fftData[2 * i];
             double imag = fftData[2 * i + 1];
@@ -696,7 +729,7 @@ public class FragmentMachDienXC extends Fragment {
             freqs[i] = i / (length * sampleTime);
         }
 
-        // Xác định tần số và biên độ ước tính
+        // Xác định tần số chính
         int maxIndex = 0;
         for (int i = 1; i < magnitudes.length; i++) {
             if (magnitudes[i] > magnitudes[maxIndex]) {
@@ -709,14 +742,162 @@ public class FragmentMachDienXC extends Fragment {
         Log.d("data", "Tần số ước tính: " + f_estimated);
         Log.d("data", "Biên độ ước tính: " + A_estimated);
 
-        // Tìm pha bằng cách khớp tín hiệu
+        // Tính pha
         double phi_estimated = findPhase(t, y, A_estimated, f_estimated);
         Log.d("data", "Pha ước tính: " + phi_estimated);
-        sinewave[0] = A_estimated;
+
+        // **Tính năng lượng của các bội số tần số chính**
+        double energyF = A_estimated;  // Năng lượng tần số chính
+        double energy2F = 0, energy3F = 0, energy4F = 0, energy5F = 0; // Bội số
+        for (int i = 1; i < length / 2; i++) {
+            if (Math.abs(freqs[i] - 2 * f_estimated) < 0.05 * f_estimated) {
+                energy2F += magnitudes[i];
+            } else if (Math.abs(freqs[i] - 3 * f_estimated) < 0.05 * f_estimated) {
+                energy3F += magnitudes[i];
+            } else if (Math.abs(freqs[i] - 4 * f_estimated) < 0.05 * f_estimated) {
+                energy4F += magnitudes[i];
+            } else if (Math.abs(freqs[i] - 5 * f_estimated) < 0.05 * f_estimated) {
+                energy5F += magnitudes[i];
+            }
+        }
+
+        double ratio2F = energy2F / energyF;
+        double ratio3F = energy3F / energyF;
+        double ratio4F = energy4F / energyF;
+        double ratio5F = energy5F / energyF;
+
+//        Log.d("data", "Tỷ lệ 2F/F: " + ratio2F);
+//        Log.d("data", "Tỷ lệ 3F/F: " + ratio3F);
+//        Log.d("data", "Tỷ lệ 4F/F: " + ratio4F);
+//        Log.d("data", "Tỷ lệ 5F/F: " + ratio5F);
+
+        // **Phân loại tín hiệu**
+        int signalType;
+        if (A_estimated < 0.05) {
+            signalType = 3; // Tín hiệu gần 0
+        } else if (energy2F / energyF > 0.3 && energy3F / energyF < 0.1) {
+            signalType = 1; // Chỉnh lưu đơn
+            A_estimated += energy2F; // Bổ sung năng lượng của 2F
+        } else if (energy2F / energyF > 0.2 && energy3F / energyF > 0.15) {
+            signalType = 2; // Chỉnh lưu cầu
+            A_estimated = 2 * energy2F; // Biên độ chủ yếu nằm ở 2F
+        } else {
+            signalType = 0; // Hình sin chuẩn
+        }
+        Log.d("data", "Loại tín hiệu: " + signalType);
+
+        sinewave[0] = A_estimated + average;
         sinewave[1] = f_estimated;
         sinewave[2] = phi_estimated;
+        sinewave[3] = signalType;
+
         return sinewave;
     }
 
+    public static List<Float> smoothSignal(List<Float> signal, int windowSize) {
+        List<Float> result = new ArrayList<>();
+        for (int i = 0; i < signal.size(); i++) {
+            float sum = 0;
+            int count = 0;
+            for (int j = i - windowSize; j <= i + windowSize; j++) {
+                if (j >= 0 && j < signal.size()) {
+                    sum += signal.get(j);
+                    count++;
+                }
+            }
+            result.add(sum / count);
+        }
+        return result;
+    }
 
+    // Tính biên độ (cách tốt hơn, trừ trung bình)
+    public static float getAmplitude(List<Float> signal) {
+        float mean = 0f;
+        for (float val : signal) mean += val;
+        mean /= signal.size();
+
+        float maxAbs = 0f;
+        for (float val : signal) {
+            float diff = Math.abs(val - mean);
+            if (diff > maxAbs) maxAbs = diff;
+        }
+        return maxAbs;
+    }
+
+    // Tìm đỉnh sóng (local maxima)
+    public static List<Integer> findPeaks(List<Float> signal) {
+        List<Integer> peaks = new ArrayList<>();
+        for (int i = 1; i < signal.size() - 1; i++) {
+            if (signal.get(i) > signal.get(i - 1) && signal.get(i) > signal.get(i + 1)) {
+                peaks.add(i);
+            }
+        }
+        return peaks;
+    }
+
+    // Ước lượng tần số từ khoảng cách giữa các đỉnh
+    public static float estimateFrequency(List<Float> signal, float sampleRateHz) {
+        List<Integer> peaks = findPeaks(signal);
+        if (peaks.size() < 2) return 0f;
+
+        List<Integer> distances = new ArrayList<>();
+        for (int i = 1; i < peaks.size(); i++) {
+            distances.add(peaks.get(i) - peaks.get(i - 1));
+        }
+
+        float avgDistance = 0f;
+        for (int d : distances) avgDistance += d;
+        avgDistance /= distances.size();
+
+        float periodSec = avgDistance / sampleRateHz;
+        return 1f / periodSec;
+    }
+
+    // Phân loại dạng sóng
+    public static int classifyWaveform(List<Float> signal) {
+        float min = Collections.min(signal);
+        float max = Collections.max(signal);
+        List<Integer> peaks = findPeaks(signal);
+
+        boolean hasNegative = min < -0.05f;
+        int peakCount = peaks.size();
+
+        if (hasNegative && peakCount >= 1) {
+            return 0;
+        } else if (!hasNegative && peakCount <= 1) {
+            return 1;
+        } else if (!hasNegative && peakCount >= 2) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
+    // Ước lượng pha (phase shift) của tín hiệu (theo vị trí đỉnh đầu tiên)
+    public static float estimatePhase(List<Float> signal, float sampleRateHz, float frequency) {
+        List<Integer> peaks = findPeaks(signal);
+        if (peaks.size() == 0) return 0f;
+
+        float period = 1f / frequency;
+        float timeToFirstPeak = peaks.get(0) / sampleRateHz;
+
+        // Phase = (time offset / period) * 2π
+        float phase = (timeToFirstPeak / period) * (float) (2 * Math.PI);
+        return phase;
+    }
+
+    // Phân tích tổng hợp
+    public static void analyze(List<Float> rawSignal, float sampleRateHz) {
+        List<Float> smooth = smoothSignal(rawSignal, 1);
+
+        float amplitude = getAmplitude(smooth);
+        float frequency = estimateFrequency(smooth, sampleRateHz);
+        int type = classifyWaveform(smooth);
+        float phase = estimatePhase(smooth, sampleRateHz, frequency);
+
+        Log.d("data","Biên độ: " + amplitude);
+        Log.d("data","Tần số: " + frequency + " Hz");
+        Log.d("data","Pha (rad): " + phase);
+        Log.d("data","Dạng sóng: " + type);
+    }
 }

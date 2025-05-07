@@ -68,10 +68,11 @@ public class FragmentToado extends Fragment implements FragmentDothi.PhantichDot
         df1.setMinimumIntegerDigits(1);
         df2.setMinimumIntegerDigits(1);
         df3.setMinimumIntegerDigits(1);
-        if(dulieuDothiList.get(position).getTencambien()=="Vị trí"){
+        String cambien = dulieuDothiList.get(position).getTencambien();
+        if(cambien=="Vị trí"){
             txtGiatri1.setText("x=" + df2.format(giatri1).replace(',', '.') + " s");
             txtGiatri2.setText("y=" + df1.format(giatri2).replace(',', '.') + " " + donvi);
-        }else if(dulieuDothiList.get(position).getTencambien()=="Dòng điện"){
+        }else if(cambien=="Dòng điện" || cambien == "Điện áp" || cambien == "pH"){
             txtGiatri1.setText("x=" + df3.format(giatri1).replace(',', '.') + " s");
             txtGiatri2.setText("y=" + df3.format(giatri2).replace(',', '.') + " "+donvi);
         }else{
