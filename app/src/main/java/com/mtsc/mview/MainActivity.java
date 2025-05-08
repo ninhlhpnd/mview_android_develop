@@ -87,7 +87,10 @@ import com.mtsc.mview.ultis.Uuid;
 
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -96,6 +99,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -179,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         }
                         btnStart.setText("Dừng Lại");
                         solanchay++;
-                        Run currentRun = new Run((int) solanchay, tansoLayMau);
+                        Run currentRun = new Run((int) solanchay, 1000/tansoLayMau);
                         allRuns.add(currentRun);
                         List<Float> manglanchay = new ArrayList<>();
                         manglanchay.add(solanchay);
@@ -633,7 +637,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             String fileName = input.getText().toString().trim();
             if (!fileName.isEmpty()) {
                 // Gọi phương thức lưu file Excel
-                exportToExcel(context, fileName, listDulieucaccambien);
+                exportToExcel(context, fileName, allRuns);
             } else {
                 Toast.makeText(context, "Tên file không được để trống", Toast.LENGTH_SHORT).show();
             }
@@ -645,7 +649,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         builder.show();
     }
 
-    public void exportToExcel(Context context, String fileName, List<DulieuCacCamBien> dataList) {
+    public void exportToExcel(Context context, String fileName, List<Run> runList) {
         // Kiểm tra và yêu cầu quyền bộ nhớ ngoài
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -657,30 +661,30 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         // Tạo Workbook và Sheet
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Sensor Data");
-        if (allRuns.isEmpty()) return;
+        if (runList.isEmpty()) return;
 
-        int sensorCount = allRuns.get(0).getSensors().size();
+        int sensorCount = runList.get(0).getSensors().size();
         int groupSize = sensorCount + 1;
         Row headerRow1 = sheet.createRow(0);
         int col = 0;
-        for (int i = 0; i < allRuns.size(); i++) {
+        for (int i = 0; i < runList.size(); i++) {
             sheet.addMergedRegion(new CellRangeAddress(0, 0, col, col + groupSize - 1));
             Cell cell = headerRow1.createCell(col);
-            cell.setCellValue("Chạy " + allRuns.get(i).getRunNumber());
+            cell.setCellValue("Chạy " + runList.get(i).getRunNumber());
             col += groupSize;
         }
         Row headerRow2 = sheet.createRow(1);
         col = 0;
-        for (Run run : allRuns) {
+        for (Run run : runList) {
             headerRow2.createCell(col++).setCellValue("Thời gian (s)");
             for (SensorData sensor : run.getSensors()) {
-                headerRow2.createCell(col++).setCellValue(sensor.getSensorName() + " (DV)");
+                headerRow2.createCell(col++).setCellValue(sensor.getSensorName() + "(" + sensor.getDonvi() + ")");
             }
         }
         int maxRowCount = 0;
-        for (Run run : allRuns) {
+        for (Run run : runList) {
             for (SensorData sensor : run.getSensors()) {
-                maxRowCount = Math.max(maxRowCount, sensor.values.size());
+                maxRowCount = Math.max(maxRowCount, sensor.getValues().size());
             }
         }
 
@@ -690,12 +694,20 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
             col = 0;
             for (Run run : runList) {
-                double timeStep = 1.0 / run.frequency;
-                row.createCell(col++).setCellValue(rowIdx * timeStep);
+                int maxSensorSize = 0;
+                for (SensorData sensor : run.getSensors()) {
+                    maxSensorSize = Math.max(maxSensorSize, sensor.getValues().size());
+                }
+                double timeStep = 1.0 / run.getFrequency();
+                if (rowIdx < maxSensorSize) {
+                    row.createCell(col++).setCellValue(rowIdx * timeStep);
+                } else {
+                    row.createCell(col++).setBlank(); // nếu không đủ giá trị thì để trống cả thời gian
+                }
 
-                for (SensorData sensor : run.sensors) {
-                    if (rowIdx < sensor.values.size()) {
-                        row.createCell(col++).setCellValue(sensor.values.get(rowIdx));
+                for (SensorData sensor : run.getSensors()) {
+                    if (rowIdx < sensor.getValues().size()) {
+                        row.createCell(col++).setCellValue(sensor.getValues().get(rowIdx));
                     } else {
                         row.createCell(col++).setBlank(); // nếu thiếu giá trị thì để trống
                     }
@@ -715,6 +727,72 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             e.printStackTrace();
             Toast.makeText(context, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
         }
+    }
+    public void showOpenFile(){
+
+    }
+    public List<Run> importFromExcel(File file) {
+        List<Run> runs = new ArrayList<>();
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Row headerRow1 = sheet.getRow(0);
+            Row headerRow2 = sheet.getRow(1);
+
+            if (headerRow1 == null || headerRow2 == null) return runs;
+
+            int col = 0;
+            while (col < headerRow1.getLastCellNum()) {
+                Cell runCell = headerRow1.getCell(col);
+                String runTitle = runCell.getStringCellValue(); // "Chạy X"
+                int runNumber = Integer.parseInt(runTitle.replaceAll("[^0-9]", ""));
+
+                List<SensorData> sensors = new ArrayList<>();
+                col++; // skip thời gian
+                while (col < headerRow1.getLastCellNum()) {
+                    Cell sensorCell = headerRow2.getCell(col);
+                    if (sensorCell == null) break;
+                    String sensorName = sensorCell.getStringCellValue().replace(" (DV)", "");
+                    sensors.add(new SensorData(sensorName));
+                    col++;
+                }
+
+                Run run = new Run(runNumber, 1); // frequency sẽ tính sau
+                for (SensorData sd : sensors) {
+                    run.addSensorData(sd);
+                }
+                runs.add(run);
+            }
+
+            // Đọc dữ liệu từ dòng 2 trở đi
+            for (int rowIdx = 2; rowIdx <= sheet.getLastRowNum(); rowIdx++) {
+                Row row = sheet.getRow(rowIdx);
+                if (row == null) continue;
+
+                int colIndex = 0;
+                for (Run run : runs) {
+                    Cell timeCell = row.getCell(colIndex++);
+                    double time = (timeCell != null && timeCell.getCellType() == CellType.NUMERIC)
+                            ? timeCell.getNumericCellValue() : -1;
+
+                    for (SensorData sensor : run.getSensors()) {
+                        Cell dataCell = row.getCell(colIndex++);
+                        if (dataCell != null && dataCell.getCellType() == CellType.NUMERIC) {
+                            sensor.getValues().add(dataCell.getNumericCellValue());
+                        }
+                    }
+                }
+            }
+
+            workbook.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return runs;
     }
 
     private void hienThiBocuc(View view) {
