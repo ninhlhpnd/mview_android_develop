@@ -20,11 +20,13 @@ import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
+import android.provider.DocumentsContract;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -102,10 +104,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public static float thoigian = 0;
     public static double tansoLayMau = 1000;
     public static float solanchay = 0;
-    public List<Run> allRuns;
+    public static List<Run> allRuns;
     Timer timer1;
     public static boolean isConnectedUSB = false;
     public static UsbSerialPort usbSerialPort;
@@ -581,7 +585,10 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             @Override
             public void onItemClick(int position) {
                 Toast.makeText(getBaseContext(), "Chon lan " + (position + 1), Toast.LENGTH_SHORT).show();
-
+                List<Float> manglanchay = new ArrayList<>();
+                manglanchay.add((float)position);
+                DulieuCB dulieuCB = new DulieuCB("xemlai", "xemlai", manglanchay);
+                EventBus.getDefault().post(new DataEvent(dulieuCB));
             }
 
             @Override
@@ -604,19 +611,17 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         }
         popupWindow.setOutsideTouchable(true);
         popupWindow.showAsDropDown(view);
-        imgOpen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                lichsu.add("lan" + lichsu.size());
-//                lichsuAdapter.notifyDataSetChanged();
-//                int newHeight = (lichsu.size() > 4) ? maxHeight : ViewGroup.LayoutParams.WRAP_CONTENT;
-//                popupWindow.update(400, newHeight);
-            }
-        });
+
         imgSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showSaveDialog(MainActivity.this);
+            }
+        });
+        imgOpen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showOpenFile(MainActivity.this);
             }
         });
     }
@@ -720,79 +725,122 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             File file = new File(downloadsDir, fileName + ".xlsx");
             FileOutputStream outputStream = new FileOutputStream(file);
             workbook.write(outputStream);
-            workbook.close();
-            outputStream.close();
+            outputStream.flush();           // thêm dòng này để đảm bảo dữ liệu được đẩy ra file
+            outputStream.close();           // đóng stream ghi trước
+            workbook.close();               // rồi mới đóng workbook (nội bộ POI cleanup)
             Toast.makeText(context, "Đã lưu file tại: " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(context, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
         }
     }
-    public void showOpenFile(){
+    public void showOpenFile(Context context){
+        File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS); // an toàn hơn
+        File[] files = downloadsDir.listFiles((d, name) -> name.endsWith(".xlsx"));
 
+        if (files != null && files.length > 0) {
+            String[] fileNames = Arrays.stream(files).map(File::getName).toArray(String[]::new);
+
+            new AlertDialog.Builder(context)
+                    .setTitle("Chọn file để mở")
+                    .setItems(fileNames, (dialog, which) -> {
+                        File selectedFile = new File(downloadsDir, fileNames[which]);
+                        // Gọi hàm đọc file
+                        Log.d("DEBUG", "Selected file: " + selectedFile);
+
+                        List<Run> runs = importFromExcel(selectedFile);
+                        allRuns.clear();
+                        allRuns.addAll(runs);
+
+                    })
+                    .show();
+        } else {
+            Toast.makeText(this, "Không tìm thấy file Excel nào", Toast.LENGTH_SHORT).show();
+        }
     }
     public List<Run> importFromExcel(File file) {
-        List<Run> runs = new ArrayList<>();
+        List<Run> runList = new ArrayList<>();
+
         try {
-            FileInputStream fis = new FileInputStream(file);
-            Workbook workbook = new XSSFWorkbook(fis);
-            Sheet sheet = workbook.getSheetAt(0);
+            FileInputStream inputStream  = new FileInputStream(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream );
+            XSSFSheet sheet = workbook.getSheetAt(0);
 
-            Row headerRow1 = sheet.getRow(0);
-            Row headerRow2 = sheet.getRow(1);
+            Row headerRow1 = sheet.getRow(0); // "Chạy n"
+            Row headerRow2 = sheet.getRow(1); // "Thời gian (s)", "SensorName"
 
-            if (headerRow1 == null || headerRow2 == null) return runs;
-
-            int col = 0;
-            while (col < headerRow1.getLastCellNum()) {
-                Cell runCell = headerRow1.getCell(col);
-                String runTitle = runCell.getStringCellValue(); // "Chạy X"
-                int runNumber = Integer.parseInt(runTitle.replaceAll("[^0-9]", ""));
-
-                List<SensorData> sensors = new ArrayList<>();
-                col++; // skip thời gian
-                while (col < headerRow1.getLastCellNum()) {
-                    Cell sensorCell = headerRow2.getCell(col);
-                    if (sensorCell == null) break;
-                    String sensorName = sensorCell.getStringCellValue().replace(" (DV)", "");
-                    sensors.add(new SensorData(sensorName));
-                    col++;
-                }
-
-                Run run = new Run(runNumber, 1); // frequency sẽ tính sau
-                for (SensorData sd : sensors) {
-                    run.addSensorData(sd);
-                }
-                runs.add(run);
+            if (headerRow1 == null || headerRow2 == null) {
+                Log.e("DEBUG_IMPORT", "headerRow1 hoặc headerRow2 null -> Dừng");
+                return runList;
             }
 
-            // Đọc dữ liệu từ dòng 2 trở đi
-            for (int rowIdx = 2; rowIdx <= sheet.getLastRowNum(); rowIdx++) {
-                Row row = sheet.getRow(rowIdx);
-                if (row == null) continue;
+            int col = 0;
+            int runIndex = 0;
 
-                int colIndex = 0;
-                for (Run run : runs) {
-                    Cell timeCell = row.getCell(colIndex++);
-                    double time = (timeCell != null && timeCell.getCellType() == CellType.NUMERIC)
-                            ? timeCell.getNumericCellValue() : -1;
+            while (col < headerRow1.getLastCellNum()) {
+                // Lấy "Chạy x"
+                Cell mergedCell = headerRow1.getCell(col);
+                String runTitle = mergedCell.getStringCellValue(); // ví dụ: "Chạy 1"
+                int runNumber = Integer.parseInt(runTitle.replace("Chạy ", "").trim());
 
-                    for (SensorData sensor : run.getSensors()) {
-                        Cell dataCell = row.getCell(colIndex++);
-                        if (dataCell != null && dataCell.getCellType() == CellType.NUMERIC) {
-                            sensor.getValues().add(dataCell.getNumericCellValue());
+                // Tạo đối tượng Run
+                Run run = new Run(runNumber,1);
+
+                List<SensorData> sensorList = new ArrayList<>();
+
+                // Dòng 2: tiêu đề từng cột (thời gian, cảm biến 1, cảm biến 2,...)
+                Cell timeCell = headerRow2.getCell(col++); // bỏ qua "Thời gian (s)"
+                while (col < headerRow2.getLastCellNum()) {
+                    Cell sensorCell = headerRow2.getCell(col++);
+                    if (sensorCell == null) break;
+
+                    String nameUnit = sensorCell.getStringCellValue(); // ví dụ: "Voltage (V)"
+                    String sensorName = nameUnit.split("\\(")[0].trim();
+                    String donvi = nameUnit.contains("(") ? nameUnit.replaceAll(".*\\((.*)\\).*", "$1") : "";
+
+                    SensorData sensorData = new SensorData(sensorName);
+                    sensorList.add(sensorData);
+                }
+
+                // Đọc dữ liệu từ dòng 3 trở đi
+                int rowIdx = 2;
+                while (true) {
+                    Row row = sheet.getRow(rowIdx++);
+                    if (row == null) break;
+
+                    int cellIdx = col - sensorList.size() - 1; // bắt đầu tại cột "Thời gian (s)"
+                    Cell timeDataCell = row.getCell(cellIdx);
+                    boolean allEmpty = true;
+
+                    for (SensorData sensor : sensorList) {
+                        Cell valueCell = row.getCell(++cellIdx);
+                        if (valueCell != null && valueCell.getCellType() == CellType.NUMERIC) {
+                            float value = (float) valueCell.getNumericCellValue();
+                            sensor.addValue(value);
+                            allEmpty = false;
+                        } else {
+                            sensor.getValues().add(null); // hoặc bỏ qua nếu muốn
                         }
                     }
+
+                    if (allEmpty) break; // nếu dòng này rỗng toàn bộ thì dừng
                 }
+
+//                run.addSensorData(sensorList);
+                runList.add(run);
+
+                runIndex++;
+                col++; // nhảy qua cột trống tiếp theo nếu có
             }
 
             workbook.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            inputStream .close();
+        } catch (Exception e) {
+            Log.e("IMPORT_ERROR", "Lỗi đọc file Excel: " + e.getMessage(), e);
+
         }
 
-        return runs;
+        return runList;
     }
 
     private void hienThiBocuc(View view) {

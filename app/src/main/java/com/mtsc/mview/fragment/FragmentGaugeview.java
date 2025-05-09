@@ -20,6 +20,7 @@ import com.mtsc.mview.MainActivity;
 import com.mtsc.mview.R;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.MovingAverageFilter;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.ultis.Uuid;
 
 import org.w3c.dom.Text;
@@ -135,7 +136,7 @@ public class FragmentGaugeview extends Fragment implements FragmentBaseMain.OnDa
     }
 
     @Override
-    public void xemLaiDulieuCu(Map<String, List<Float>> dulieuCu, Float tanso) {
+    public void xemLaiDulieuCu(List<SensorData> sensorDataList, Float tanso) {
 
     }
 

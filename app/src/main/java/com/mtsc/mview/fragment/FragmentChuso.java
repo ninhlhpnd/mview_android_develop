@@ -21,6 +21,7 @@ import com.mtsc.mview.MainActivity;
 import com.mtsc.mview.R;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.MovingAverageFilter;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.ultis.Uuid;
 
 import org.apache.commons.math3.filter.KalmanFilter;
@@ -149,7 +150,7 @@ public class FragmentChuso extends Fragment implements FragmentBaseMain.OnDataCh
     }
 
     @Override
-    public void xemLaiDulieuCu(Map<String, List<Float>> dulieuCu,Float tanso) {
+    public void xemLaiDulieuCu(List<SensorData> sensorDataList, Float tanso) {
 
     }
 

@@ -30,6 +30,7 @@ import com.mtsc.mview.R;
 import com.mtsc.mview.adapter.DulieuDothiAdapter;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.DulieuDothi;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.ultis.Uuid;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -271,7 +272,7 @@ public class FragmentBangsolieu extends Fragment implements FragmentBaseMain.OnD
         }
         currentColumnCount++;
 
-        listDulieubang.add(new DulieuDothi(mamaudothi[listDulieubang.size()], tencambien, macambien, donvi, new double[]{slope,offset}));
+        listDulieubang.add(new DulieuDothi(mamaudothi[listDulieubang.size()], tencambien, macambien, donvi, new double[]{slope, offset}));
         listRow.add(0);
         dulieuBangAdapter.notifyDataSetChanged();
     }
@@ -280,12 +281,12 @@ public class FragmentBangsolieu extends Fragment implements FragmentBaseMain.OnD
     public void onDataReceived(DulieuCB dulieuCB) {
         for (int i = 0; i < listDulieubang.size(); i++) {
             String cambienma = listDulieubang.get(i).getMacambien();
-            String cambienten=listDulieubang.get(i).getTencambien();
+            String cambienten = listDulieubang.get(i).getTencambien();
             double slope = listDulieubang.get(i).getHeso()[0];
             double offset = listDulieubang.get(i).getHeso()[1];
             if (dulieuCB.getMacambien().equals(cambienma) && dulieuCB.getTencambien().equals(cambienten)
                     && dulieuCB.getGiatricambien() != null) {
-               List<Float> mangdulieu = dulieuCB.getGiatricambien();
+                List<Float> mangdulieu = dulieuCB.getGiatricambien();
                 int rowIndex = listRow.get(i);
                 for (float x : mangdulieu
                 ) {
@@ -370,20 +371,21 @@ public class FragmentBangsolieu extends Fragment implements FragmentBaseMain.OnD
     }
 
     @Override
-    public void xemLaiDulieuCu(Map<String, List<Float>> dulieuCu, Float tanso) {
+    public void xemLaiDulieuCu(List<SensorData> sensorDataList, Float tanso) {
         for (int i = 0; i < listDulieubang.size(); i++) {
             String cambien = listDulieubang.get(i).getMacambien();
             double slope = listDulieubang.get(i).getHeso()[0];
             double offset = listDulieubang.get(i).getHeso()[1];
-            if (dulieuCu.containsKey(cambien) && dulieuCu.get(cambien) != null) {
-                List<Float> dulieu = dulieuCu.get(cambien);
-                int rowIndex = listRow.get(i);
-                for (Float value : dulieu
-                ) {
-                    addDataColumn(i, rowIndex, (float) (value * slope + offset), tanso);
-                    rowIndex = rowIndex + 1;
+            for (SensorData sensor : sensorDataList) {
+                if (sensor.getSensorName().equals(cambien) && sensor.getValues().size() > 0) {
+                    int rowIndex = listRow.get(i);
+                    for (Double value : sensor.getValues()
+                    ) {
+                        addDataColumn(i, rowIndex, (float) (value * slope + offset), tanso);
+                        rowIndex = rowIndex + 1;
+                    }
+                    listRow.set(i, rowIndex);
                 }
-                listRow.set(i, rowIndex);
             }
         }
     }

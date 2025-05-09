@@ -28,6 +28,7 @@ import com.mtsc.mview.R;
 import com.mtsc.mview.adapter.DulieuDothiAdapter;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.DulieuDothi;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.ultis.Uuid;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -487,7 +488,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
                                 double a = coefficients[0];
                                 double b = coefficients[1];
                                 double c = coefficients[2];
-                                listener.guiGiatriphantich(line, (float) a, (float) b, (float)c);
+                                listener.guiGiatriphantich(line, (float) a, (float) b, (float) c);
                             }
                             lineChart.notifyDataSetChanged();
                             lineChart.invalidate();
@@ -678,16 +679,22 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
     }
 
     @Override
-    public void xemLaiDulieuCu(Map<String, List<Float>> dulieuCu, Float tanso) {
+    public void xemLaiDulieuCu(List<SensorData> sensorDataList, Float tanso) {
         for (int i = 0; i < dulieuDothis.size(); i++) {
             String cambien = dulieuDothis.get(i).getMacambien();
-            if (dulieuCu.containsKey(cambien) && dulieuCu.get(cambien) != null) {
-                List<Float> dulieu = dulieuCu.get(cambien);
-                for (Float value : dulieu
-                ) {
-//                    addEntry(dataSets.get(i), (float) (slope * value + offset), dataSets.get(i).getEntryCount() * (float) (tanso / 1000.0));
+            double slope = dulieuDothis.get(i).getHeso()[0];
+            double offset = dulieuDothis.get(i).getHeso()[1];
+            for (SensorData sensor : sensorDataList) {
+                if (sensor.getSensorName().equals(cambien) && sensor.getValues().size() > 0) {
+                    List<Entry> entries = new ArrayList<>();
+                    int xValue = 0;
+                    for (Double value : sensor.getValues()) {
+                        entries.add(new Entry(xValue  *(1/tanso), (float) (slope * value + offset)));
+                        xValue++;
+                    }
+                    addEntry(dataSets.get(i), entries);
+                    break;
                 }
-                break;
             }
         }
     }
@@ -909,6 +916,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
     public void setOnPhantichDothi(PhantichDothi listener) {
         this.listener = listener;
     }
+
     public static double[] quadraticRegressionExact(double[] x, double[] y) {
         int n = x.length;
 

@@ -34,6 +34,8 @@ import com.mtsc.mview.adapter.chonsodoAdapterUSB;
 import com.mtsc.mview.model.CamBien;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.DulieuCacCamBien;
+import com.mtsc.mview.model.Run;
+import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.ultis.DataEvent;
 import com.mtsc.mview.ultis.Uuid;
 
@@ -105,7 +107,7 @@ public class FragmentBaseMain extends Fragment {
         imgSolanchay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                taoMenuSolanchay(view);
+//                taoMenuSolanchay(view);
             }
         });
         imgPhantich.setOnClickListener(new View.OnClickListener() {
@@ -246,23 +248,23 @@ public class FragmentBaseMain extends Fragment {
         lvSolanchay.setAdapter(adapterSolanchay);
         lvSolanchay.setEmptyView(txtEmpty);
 
-        lvSolanchay.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String strlanchay = listsolanchay.get(i);
-                listener.xoaDulieucu();
-                Map<String, List<Float>> dulieuCu = new HashMap<>();
-                Float tanso = Float.valueOf(0);
-                int lanchay = Integer.parseInt(strlanchay.substring(4));
-                for (int vitri = 0; vitri < listDulieucaccambien.size(); vitri++) {
-                    if (listDulieucaccambien.get(vitri).getLanchay() == lanchay) {
-                        dulieuCu.computeIfAbsent(listDulieucaccambien.get(vitri).getTencambien(), k -> new ArrayList<>()).add(listDulieucaccambien.get(vitri).getGiatricambien());
-                        tanso = listDulieucaccambien.get(vitri).getTansolaymau();
-                    }
-                }
-                listener.xemLaiDulieuCu(dulieuCu, tanso);
-            }
-        });
+//        lvSolanchay.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                String strlanchay = listsolanchay.get(i);
+//                listener.xoaDulieucu();
+//                Map<String, List<Float>> dulieuCu = new HashMap<>();
+//                Float tanso = Float.valueOf(0);
+//                int lanchay = Integer.parseInt(strlanchay.substring(4));
+//                for (int vitri = 0; vitri < listDulieucaccambien.size(); vitri++) {
+//                    if (listDulieucaccambien.get(vitri).getLanchay() == lanchay) {
+//                        dulieuCu.computeIfAbsent(listDulieucaccambien.get(vitri).getTencambien(), k -> new ArrayList<>()).add(listDulieucaccambien.get(vitri).getGiatricambien());
+//                        tanso = listDulieucaccambien.get(vitri).getTansolaymau();
+//                    }
+//                }
+//                listener.xemLaiDulieuCu(dulieuCu, tanso);
+//            }
+//        });
     }
 
     public void taoMenuPhantich(View v) {
@@ -398,7 +400,7 @@ public class FragmentBaseMain extends Fragment {
 
         void xoaDulieucu();
 
-        void xemLaiDulieuCu(Map<String, List<Float>> dulieuCu, Float tanso);
+        void xemLaiDulieuCu(List<SensorData> sensorDataList, Float tanso);
 
         void phantichDothi(int phantich);
     }
@@ -424,8 +426,14 @@ public class FragmentBaseMain extends Fragment {
             List<Float> manglanchay = dulieucaccambien.getGiatricambien();
             float lanchay = manglanchay.get(0);
             tansolaymau = manglanchay.get(1);
-            listsolanchay.add("Lần " + new DecimalFormat("#").format(lanchay));
-        } else {
+        } else if(dulieucaccambien.getMacambien().equals("xemlai")){
+            listener.xoaDulieucu();
+            List<Float> manglanchay = dulieucaccambien.getGiatricambien();
+            int position = manglanchay.get(0).intValue();
+            Run currentRun = MainActivity.allRuns.get(position);
+            listener.xemLaiDulieuCu(currentRun.getSensors(), (float) currentRun.getFrequency());
+
+        }else {
             listener.onDataReceived(dulieucaccambien);
 //            List<Float> mangnewValue = dulieucaccambien.getGiatricambien();
 //            for (Float newValue : mangnewValue
