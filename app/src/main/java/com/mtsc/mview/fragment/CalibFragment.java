@@ -3,6 +3,7 @@ package com.mtsc.mview.fragment;
 import static com.mtsc.mview.MainActivity.crc8;
 import static com.mtsc.mview.MainActivity.firstNibble;
 import static com.mtsc.mview.MainActivity.secondNibble;
+import static com.mtsc.mview.MainActivity.trangThai;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import com.mtsc.mview.MainActivity;
 import com.mtsc.mview.R;
 import com.mtsc.mview.model.CamBienUSB;
 import com.mtsc.mview.model.ConnectedDevice;
+import com.mtsc.mview.model.TrangThaiKetNoi;
 import com.mtsc.mview.ultis.Uuid;
 
 import java.nio.ByteBuffer;
@@ -103,7 +105,7 @@ public class CalibFragment extends DialogFragment {
                     for (int i = 0; i < tempArray.length; i++) {
                         reversedArray[i] = tempArray[tempArray.length - i - 1];
                     }
-                    if (!MainActivity.isConnectedUSB) {
+                    if (trangThai == TrangThaiKetNoi.BLE) {
                         byte[] byteArray = new byte[tempArray.length + 3];
                         byteArray[0] = 0x05;
                         byteArray[1] = 0x01;
@@ -122,7 +124,7 @@ public class CalibFragment extends DialogFragment {
 
                                     }
                                 });
-                    } else {
+                    } else if(trangThai == TrangThaiKetNoi.USB) {
                         int tenCambien = Uuid.camBiens.indexOf( MainActivity.tbScansUsb.get(0).getCamBien()) + 1;
                         int idCambien = MainActivity.tbScansUsb.get(0).getId();
                         byte[] data = {(byte) tenCambien, (byte) idCambien, 0x05};
@@ -289,7 +291,7 @@ public class CalibFragment extends DialogFragment {
     }
 
     private void send(byte[] data) {
-        if (!MainActivity.isConnectedUSB) {
+        if (trangThai == TrangThaiKetNoi.KHAC) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }

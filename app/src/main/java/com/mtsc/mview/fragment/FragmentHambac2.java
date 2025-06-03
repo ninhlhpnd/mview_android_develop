@@ -38,7 +38,7 @@ public class FragmentHambac2 extends Fragment implements FragmentDothi.PhantichD
         super.onViewCreated(view, savedInstanceState);
         lvToado = (ListView) view.findViewById(R.id.listview_fragmentPhantich);
         txtPhantich = (TextView) view.findViewById(R.id.textview_fragmentPhantich);
-        txtPhantich.setText("Trung Bình");
+        txtPhantich.setText("Hàm bậc 2");
         dulieuDothiList = new ArrayList<>();
         Bundle bundle = getArguments();
         if (bundle != null) {

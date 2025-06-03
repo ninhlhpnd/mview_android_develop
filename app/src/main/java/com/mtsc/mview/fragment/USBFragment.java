@@ -44,6 +44,7 @@ import com.mtsc.mview.adapter.tbScanAdapterUSB;
 import com.mtsc.mview.model.CamBienUSB;
 import com.mtsc.mview.model.CustomProber;
 import com.mtsc.mview.model.ListItemUSB;
+import com.mtsc.mview.model.TrangThaiKetNoi;
 import com.mtsc.mview.ultis.Uuid;
 
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class USBFragment extends DialogFragment {
     private boolean withIoManager = true;
     private int deviceId, portNum;
     private UsbSerialPort usbSerialPort;
-
+    public boolean isConnect =false;
 
     private enum UsbPermission {Unknown, Requested, Granted, Denied}
 
@@ -183,7 +184,7 @@ public class USBFragment extends DialogFragment {
                 TextView text1 = view.findViewById(R.id.textviewTen_deviceListitem);
                 TextView text2 = view.findViewById(R.id.textviewPort_deviceListitem);
                 Button btnConnect = view.findViewById(R.id.buttonConnect_devicelistitem);
-                if(MainActivity.isConnectedUSB){
+                if(isConnect){
                     int colorDo = ContextCompat.getColor(getContext(), R.color.btnStop);
                     btnConnect.setBackgroundColor(colorDo);
                     btnConnect.setText("Disconnect");
@@ -204,9 +205,9 @@ public class USBFragment extends DialogFragment {
                 btnConnect.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (!MainActivity.isConnectedUSB) {
+                        if (!isConnect) {
                             connect();
-                            if (MainActivity.isConnectedUSB) {
+                            if (isConnect) {
                                 int colorDo = ContextCompat.getColor(getContext(), R.color.btnStop);
                                 btnConnect.setBackgroundColor(colorDo);
                                 btnConnect.setText("Disconnect");
@@ -214,7 +215,7 @@ public class USBFragment extends DialogFragment {
                             }
                         } else {
                             disconnect();
-                            if (!MainActivity.isConnectedUSB) {
+                            if (!isConnect) {
                                 int colorDo = ContextCompat.getColor(getContext(), R.color.xanhduongnhat);
                                 btnConnect.setBackgroundColor(colorDo);
                                 btnConnect.setText("Connect");
@@ -280,7 +281,7 @@ public class USBFragment extends DialogFragment {
 
 
     private void send(byte[] data) {
-        if (!MainActivity.isConnectedUSB) {
+        if (!isConnect) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -351,8 +352,10 @@ public class USBFragment extends DialogFragment {
 //                usbIoManager.start();
 //            }
             status("connected");
-            MainActivity.isConnectedUSB = true;
             withIoManager = true;
+            MainActivity.trangThai = TrangThaiKetNoi.USB;
+            MainActivity.allRuns.clear();
+            isConnect = true;
             linearLayoutScan.setVisibility(View.VISIBLE);
             if (listener != null) {
                 listener.onDataReceived(withIoManager);
@@ -364,7 +367,6 @@ public class USBFragment extends DialogFragment {
     }
 
     private void disconnect() {
-        MainActivity.isConnectedUSB = false;
         withIoManager = false;
 //        if (usbIoManager != null) {
 //            usbIoManager.setListener(null);
@@ -374,6 +376,7 @@ public class USBFragment extends DialogFragment {
         try {
             usbSerialPort=MainActivity.usbSerialPort;
             usbSerialPort.close();
+            isConnect = false;
             status("Disconnected");
             linearLayoutScan.setVisibility(View.INVISIBLE);
             if (listener != null) {

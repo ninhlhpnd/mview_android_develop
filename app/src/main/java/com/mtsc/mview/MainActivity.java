@@ -15,6 +15,7 @@ import android.Manifest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
@@ -59,6 +60,7 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mtsc.mview.adapter.LichsuAdapter;
+import com.mtsc.mview.adapter.tbKetNoiAdapter;
 import com.mtsc.mview.adapter.thanhcongcuAdapter;
 import com.mtsc.mview.fragment.BluetoothFragment;
 import com.mtsc.mview.fragment.CalibFragment;
@@ -68,6 +70,7 @@ import com.mtsc.mview.fragment.FragmentBocuc3;
 import com.mtsc.mview.fragment.FragmentBocuc4;
 import com.mtsc.mview.fragment.FragmentKieuDocDulieu;
 import com.mtsc.mview.fragment.FragmentMachDienXC;
+import com.mtsc.mview.fragment.FragmentNhapbangtay;
 import com.mtsc.mview.fragment.FragmentSongam;
 import com.mtsc.mview.fragment.USBFragment;
 import com.mtsc.mview.model.CamBien;
@@ -81,6 +84,7 @@ import com.mtsc.mview.model.ListItemUSB;
 import com.mtsc.mview.model.Run;
 import com.mtsc.mview.model.SensorData;
 import com.mtsc.mview.model.SodoCambien;
+import com.mtsc.mview.model.TrangThaiKetNoi;
 import com.mtsc.mview.model.sodoCambienUSB;
 import com.mtsc.mview.model.thanhcongcuClass;
 import com.mtsc.mview.my_interface.ItemClickListener;
@@ -119,11 +123,12 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class MainActivity extends AppCompatActivity implements ItemClickListener, USBFragment.OnDataReceivedListener {
+public class MainActivity extends AppCompatActivity implements ItemClickListener, USBFragment.OnDataReceivedListener, BluetoothFragment.OnDeviceDisconnectedListener {
     RecyclerView recyclerViewThanhcongcu;
     Handler handler;
     ArrayList<thanhcongcuClass> thanhcongcuClasses;
     com.mtsc.mview.adapter.thanhcongcuAdapter thanhcongcuAdapter;
+    public static tbKetNoiAdapter tbKetnoiAdapter;
     public static List<ConnectedDevice> tbKetnois;
     public static List<SodoCambien> sodoCambienList;
     FrameLayout frmFragment;
@@ -132,10 +137,11 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     boolean isStart = false;
     public static float thoigian = 0;
     public static double tansoLayMau = 1000;
-    public static float solanchay = 0;
+    public float solanchay = 0;
     public static List<Run> allRuns;
+    public LichsuAdapter lichsuAdapter;
     Timer timer1;
-    public static boolean isConnectedUSB = false;
+    public static TrangThaiKetNoi trangThai = TrangThaiKetNoi.KHAC;
     public static UsbSerialPort usbSerialPort;
     public static List<CamBienUSB> tbScansUsb;
     public static List<sodoCambienUSB> soCambienUSB;
@@ -170,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             public void onClick(View view) {
                 isStart = !isStart;
                 if (isStart == true) {
-                    if (!isConnectedUSB) {
+                    if (trangThai == TrangThaiKetNoi.BLE) {
                         Fragment currentFragment = fragmentManager.findFragmentById(R.id.layoutFragment_main);
                         byte[] byteArray = new byte[6];
                         if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam) {
@@ -187,8 +193,12 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         }
                         btnStart.setText("Dừng Lại");
                         solanchay++;
-                        Run currentRun = new Run((int) solanchay, 1000/tansoLayMau);
-                        allRuns.add(currentRun);
+//                        Run currentRun = new Run((int) solanchay, 1000 / tansoLayMau);
+//                        if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam || currentFragment instanceof FragmentNhapbangtay) {
+//
+//                        } else {
+//                            allRuns.add(currentRun);
+//                        }
                         List<Float> manglanchay = new ArrayList<>();
                         manglanchay.add(solanchay);
                         manglanchay.add((float) tansoLayMau);
@@ -203,8 +213,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 //                            SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
 
 //                            if (sensorData == null) {
-                            SensorData sensorData = new SensorData(connectedDevice.getDevice().getName());
-                            currentRun.addSensorData(sensorData);
+//                            SensorData sensorData = new SensorData(connectedDevice.getDevice().getName());
+//                            currentRun.addSensorData(sensorData);
 //                            }
 //                            SensorData finalSensorData = sensorData;
                             BleManager.getInstance().write(connectedDevice.getDevice(), connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
@@ -293,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 //                                                                listDulieucaccambien.add(new DulieuCacCamBien(1, (float) tansoLayMau, bleDevice.getName(), value));
 //                                                            }
 //                                                            Log.d("data", String.valueOf(value));
-                                                            sensorData.addValue(value);
+//                                                            sensorData.addValue(value);
                                                         }
 
                                                         DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
@@ -316,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                                 }
                             });
                         }
-                    } else {
+                    } else if (trangThai == TrangThaiKetNoi.USB) {
                         List<Float> manglanchay = new ArrayList<>();
                         manglanchay.add(solanchay);
                         manglanchay.add((float) tansoLayMau);
@@ -365,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                     btnStart.setBackgroundColor(colorXanh);
                     btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_start, 0, 0, 0);
                     listDulieucaccambien.clear();
-                    if (!isConnectedUSB) {
+                    if (trangThai == TrangThaiKetNoi.BLE) {
                         byte[] byteArray = new byte[6];
                         byteArray[0] = 0x02;
                         byteArray[1] = 0x79;
@@ -384,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                                 }
                             });
                         }
-                    } else {
+                    } else if (trangThai == TrangThaiKetNoi.USB) {
 //                        Log.d("tag", tbScans.get(0).getCamBien().getName() + " cancle");
                         timer1.cancel();
 
@@ -493,7 +503,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         Uuid.camBiens.add(new CamBien("V&A", "Dòng Áp", null, Uuid.iconDevice[15], null, null, Uuid.daiDoDodan));
         Uuid.camBiens.add(new CamBien("Light", Uuid.Dosang, Uuid.dvDosang, Uuid.iconDevice[16], Uuid.hesoDosang, Uuid.tansoDosang, Uuid.daiDoDosang));
 
-
+        tbKetnoiAdapter = new tbKetNoiAdapter(MainActivity.this, R.layout.dong_thietbidaketnoi, tbKetnois);
+        tbKetnoiAdapter.setOnDeviceClickListener(new tbKetNoiAdapter.OnDeviceClickListener() {
+            @Override
+            public void onDisConnect(BleDevice bleDevice) {
+                BleManager.getInstance().disconnect(bleDevice);
+            }
+        });
 //        frmFragment=(FrameLayout) findViewById(R.id.framelayoutFragment);
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
@@ -517,11 +533,57 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public void onItemClick(thanhcongcuClass thanhconcu, View view) {
         switch (thanhconcu.getId()) {
             case 1: {
-                ketNoiBluetooth();
+                if (allRuns.size() > 0) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Xác nhận")
+                            .setMessage("Nếu kết nối với thiết bị khác thì các lần chạy trước sẽ bị xóa. Bạn có muốn tiếp tục?")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Xử lý khi người dùng nhấn OK - ví dụ: chuyển sang trang kết nối
+                                    ketNoiBluetooth();
+                                    MainActivity.allRuns.clear();
+                                }
+                            })
+                            .setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Đóng dialog, không làm gì cả
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                } else {
+                    ketNoiBluetooth();
+                }
                 break;
             }
             case 2: {
-                ketNoiUSB();
+                if (allRuns.size() > 0) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Xác nhận")
+                            .setMessage("Nếu kết nối với thiết bị khác thì các lần chạy trước sẽ bị xóa. Bạn có muốn tiếp tục?")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Xử lý khi người dùng nhấn OK - ví dụ: chuyển sang trang kết nối
+                                    ketNoiUSB();
+                                    MainActivity.allRuns.clear();
+
+                                }
+                            })
+                            .setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Đóng dialog, không làm gì cả
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                } else {
+                    ketNoiUSB();
+
+                }
                 break;
             }
             case 3: {
@@ -573,30 +635,32 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) view.getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.heightPixels;
-        int maxHeight = screenWidth *2/ 3;
+        int maxHeight = screenWidth * 2 / 3;
 
         ListView lvSolanchay = (ListView) popupView.findViewById(R.id.listview_lichsu);
         TextView txtEmpty = (TextView) popupView.findViewById(R.id.textviewEmpty_lichsu);
         ImageView imgOpen = (ImageView) popupView.findViewById(R.id.imageOpen_lichsu);
         ImageView imgSave = (ImageView) popupView.findViewById(R.id.imageSave_lichsu);
+        if (lichsuAdapter == null) {
+            lichsuAdapter = new LichsuAdapter(getBaseContext(), R.layout.dong_lichsu, allRuns);
+            lichsuAdapter.setOnItemActionListener(new LichsuAdapter.OnItemActionListener() {
+                @Override
+                public void onItemClick(int position) {
+                    Toast.makeText(getBaseContext(), "Chon lan " + (position + 1), Toast.LENGTH_SHORT).show();
+                    List<Float> manglanchay = new ArrayList<>();
+                    manglanchay.add((float) position);
+                    DulieuCB dulieuCB = new DulieuCB("xemlai", "xemlai", manglanchay);
+                    EventBus.getDefault().post(new DataEvent(dulieuCB));
+                }
 
-        LichsuAdapter lichsuAdapter = new LichsuAdapter(getBaseContext(), R.layout.dong_lichsu, allRuns);
-        lichsuAdapter.setOnItemActionListener(new LichsuAdapter.OnItemActionListener() {
-            @Override
-            public void onItemClick(int position) {
-                Toast.makeText(getBaseContext(), "Chon lan " + (position + 1), Toast.LENGTH_SHORT).show();
-                List<Float> manglanchay = new ArrayList<>();
-                manglanchay.add((float)position);
-                DulieuCB dulieuCB = new DulieuCB("xemlai", "xemlai", manglanchay);
-                EventBus.getDefault().post(new DataEvent(dulieuCB));
-            }
+                @Override
+                public void onDeleteClick(int position) {
+                    allRuns.remove(position);
+                    lichsuAdapter.notifyDataSetChanged();
+                }
+            });
 
-            @Override
-            public void onDeleteClick(int position) {
-                allRuns.remove(position);
-                lichsuAdapter.notifyDataSetChanged();
-            }
-        });
+        }
         lvSolanchay.setEmptyView(txtEmpty);
 
         lvSolanchay.setAdapter(lichsuAdapter);
@@ -622,6 +686,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             @Override
             public void onClick(View view) {
                 showOpenFile(MainActivity.this);
+                trangThai = TrangThaiKetNoi.HISTORY;
+                BleManager.getInstance().disconnectAllDevice();
             }
         });
     }
@@ -656,13 +722,12 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
     public void exportToExcel(Context context, String fileName, List<Run> runList) {
         // Kiểm tra và yêu cầu quyền bộ nhớ ngoài
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
-            return;
-        }
-
+//        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions((Activity) context,
+//                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
+//            return;
+//        }
         // Tạo Workbook và Sheet
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Sensor Data");
@@ -683,7 +748,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         for (Run run : runList) {
             headerRow2.createCell(col++).setCellValue("Thời gian (s)");
             for (SensorData sensor : run.getSensors()) {
-                headerRow2.createCell(col++).setCellValue(sensor.getSensorName() + "(" + sensor.getDonvi() + ")");
+                headerRow2.createCell(col++).setCellValue(sensor.getSensorName() + "(" + sensor.getSodo().get("donvi")[0] + ")");
             }
         }
         int maxRowCount = 0;
@@ -722,6 +787,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         // Lưu Workbook vào bộ nhớ ngoài
         try {
             File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS); // an toàn hơn
+
             File file = new File(downloadsDir, fileName + ".xlsx");
             FileOutputStream outputStream = new FileOutputStream(file);
             workbook.write(outputStream);
@@ -729,12 +795,15 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             outputStream.close();           // đóng stream ghi trước
             workbook.close();               // rồi mới đóng workbook (nội bộ POI cleanup)
             Toast.makeText(context, "Đã lưu file tại: " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            Log.d("EXPORT", "Đã lưu file tại: " + file.getAbsolutePath());
+
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(context, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
         }
     }
-    public void showOpenFile(Context context){
+
+    public void showOpenFile(Context context) {
         File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS); // an toàn hơn
         File[] files = downloadsDir.listFiles((d, name) -> name.endsWith(".xlsx"));
 
@@ -751,19 +820,22 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         List<Run> runs = importFromExcel(selectedFile);
                         allRuns.clear();
                         allRuns.addAll(runs);
-
+                        if (lichsuAdapter != null) {
+                            lichsuAdapter.notifyDataSetChanged();
+                        }
                     })
                     .show();
         } else {
             Toast.makeText(this, "Không tìm thấy file Excel nào", Toast.LENGTH_SHORT).show();
         }
     }
+
     public List<Run> importFromExcel(File file) {
         List<Run> runList = new ArrayList<>();
 
         try {
-            FileInputStream inputStream  = new FileInputStream(file);
-            XSSFWorkbook workbook = new XSSFWorkbook(inputStream );
+            FileInputStream inputStream = new FileInputStream(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             XSSFSheet sheet = workbook.getSheetAt(0);
 
             Row headerRow1 = sheet.getRow(0); // "Chạy n"
@@ -775,66 +847,76 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             }
 
             int col = 0;
-            int runIndex = 0;
-
             while (col < headerRow1.getLastCellNum()) {
-                // Lấy "Chạy x"
-                Cell mergedCell = headerRow1.getCell(col);
-                String runTitle = mergedCell.getStringCellValue(); // ví dụ: "Chạy 1"
-                int runNumber = Integer.parseInt(runTitle.replace("Chạy ", "").trim());
+                // --- Lấy thông tin Run ---
+                Cell cell = headerRow1.getCell(col);
+                if (cell == null || cell.getCellType() != CellType.STRING) break;
 
-                // Tạo đối tượng Run
-                Run run = new Run(runNumber,1);
+                String title = cell.getStringCellValue(); // VD: "Chạy 1"
+                int runNumber = Integer.parseInt(title.replace("Chạy", "").trim());
+                int startCol = col;
 
-                List<SensorData> sensorList = new ArrayList<>();
-
-                // Dòng 2: tiêu đề từng cột (thời gian, cảm biến 1, cảm biến 2,...)
-                Cell timeCell = headerRow2.getCell(col++); // bỏ qua "Thời gian (s)"
-                while (col < headerRow2.getLastCellNum()) {
-                    Cell sensorCell = headerRow2.getCell(col++);
-                    if (sensorCell == null) break;
-
-                    String nameUnit = sensorCell.getStringCellValue(); // ví dụ: "Voltage (V)"
-                    String sensorName = nameUnit.split("\\(")[0].trim();
-                    String donvi = nameUnit.contains("(") ? nameUnit.replaceAll(".*\\((.*)\\).*", "$1") : "";
-
-                    SensorData sensorData = new SensorData(sensorName);
-                    sensorList.add(sensorData);
+                // Đếm số cảm biến
+                int sensorCount = 0;
+                for (int i = startCol + 1; i < headerRow2.getLastCellNum(); i++) {
+                    Cell c = headerRow2.getCell(i);
+                    if (c == null || c.getStringCellValue().startsWith("Thời gian")) break;
+                    sensorCount++;
                 }
 
-                // Đọc dữ liệu từ dòng 3 trở đi
-                int rowIdx = 2;
+                Run run = new Run(runNumber, 1.0); // giả định freq = 1Hz, có thể tính sau
+
+                // --- Tạo SensorData ---
+                List<SensorData> sensors = new ArrayList<>();
+                for (int i = 0; i < sensorCount; i++) {
+                    Cell nameCell = headerRow2.getCell(startCol + 1 + i);
+                    if (nameCell != null) {
+                        String nameWithUnit = nameCell.getStringCellValue(); // VD: "Device 1 (DV)"
+                        String name = nameWithUnit.replaceAll("\\s*\\(.*?\\)", ""); // Xoá phần " (DV)" nếu có
+                        sensors.add(new SensorData(name));
+                    }
+                }
+
+                // --- Đọc dữ liệu ---
+                int rowIndex = 2;
+                List<Double> timeValues = new ArrayList<>();
                 while (true) {
-                    Row row = sheet.getRow(rowIdx++);
-                    if (row == null) break;
+                    Row dataRow = sheet.getRow(rowIndex++);
+                    if (dataRow == null) break;
 
-                    int cellIdx = col - sensorList.size() - 1; // bắt đầu tại cột "Thời gian (s)"
-                    Cell timeDataCell = row.getCell(cellIdx);
-                    boolean allEmpty = true;
+                    Cell timeCell = dataRow.getCell(startCol);
+                    if (timeCell == null || timeCell.getCellType() != CellType.NUMERIC) break;
 
-                    for (SensorData sensor : sensorList) {
-                        Cell valueCell = row.getCell(++cellIdx);
+                    timeValues.add(timeCell.getNumericCellValue());
+
+                    for (int i = 0; i < sensorCount; i++) {
+                        Cell valueCell = dataRow.getCell(startCol + 1 + i);
                         if (valueCell != null && valueCell.getCellType() == CellType.NUMERIC) {
-                            float value = (float) valueCell.getNumericCellValue();
-                            sensor.addValue(value);
-                            allEmpty = false;
+                            sensors.get(i).addValue(valueCell.getNumericCellValue());
                         } else {
-                            sensor.getValues().add(null); // hoặc bỏ qua nếu muốn
+                            sensors.get(i).addValue(0.0); // hoặc null nếu bạn thích
                         }
                     }
-
-                    if (allEmpty) break; // nếu dòng này rỗng toàn bộ thì dừng
                 }
 
-//                run.addSensorData(sensorList);
-                runList.add(run);
+                // Tính tần số nếu có thể
+                if (timeValues.size() >= 2) {
+                    double delta = timeValues.get(1) - timeValues.get(0);
+                    if (delta > 0) {
+                        run = new Run(runNumber, 1.0 / delta);
+                    }
+                }
 
-                runIndex++;
-                col++; // nhảy qua cột trống tiếp theo nếu có
+                for (SensorData sd : sensors) {
+                    run.addSensorData(sd);
+                }
+
+                runList.add(run);
+                col = startCol + sensorCount + 1; // nhảy đến nhóm tiếp theo
             }
 
             workbook.close();
-            inputStream .close();
+            inputStream.close();
         } catch (Exception e) {
             Log.e("IMPORT_ERROR", "Lỗi đọc file Excel: " + e.getMessage(), e);
 
@@ -926,7 +1008,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     }
 
     private void send(byte[] data) {
-        if (!isConnectedUSB) {
+        if (trangThai == TrangThaiKetNoi.KHAC) {
             Toast.makeText(this, "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1233,4 +1315,27 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
     }
 
+    @Override
+    public void onDeviceDisconnected(BleDevice bleDevice, boolean isActive) {
+        for (int i = 0; i < tbKetnois.size(); i++) {
+            BleDevice device = tbKetnois.get(i).getDevice();
+            if (bleDevice.getKey().equals(device.getKey())) {
+                tbKetnois.remove(i);
+                break;
+            }
+        }
+        tbKetnoiAdapter.notifyDataSetChanged();
+        for (int i = 0; i < sodoCambienList.size(); i++) {
+            if (sodoCambienList.get(i).getBleDevice().getKey().equals(bleDevice.getKey())) {
+                sodoCambienList.remove(i);
+            }
+        }
+        if (isActive == false) {
+            new android.app.AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Mất kết nối")
+                    .setMessage("Thiết bị " + bleDevice.getName() + " đã bị ngắt kết nối.")
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
+    }
 }

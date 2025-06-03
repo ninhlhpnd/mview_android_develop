@@ -162,9 +162,12 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
                 if (kieuPhantich == 0) {
                     lineChart.setDragXEnabled(true);
                     lineChart.onTouchEvent(motionEvent);
+                    lineChart.setScaleEnabled(true);
                 } else {
                     lineChart.setDragXEnabled(false);
+                    lineChart.setScaleEnabled(false);
                 }
+                if (!isChartDataValid(lineChart)) return false;
                 switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_MOVE:
                         if (kieuPhantich == 1) {
@@ -689,7 +692,7 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
                     List<Entry> entries = new ArrayList<>();
                     int xValue = 0;
                     for (Double value : sensor.getValues()) {
-                        entries.add(new Entry(xValue  *(1/tanso), (float) (slope * value + offset)));
+                        entries.add(new Entry(xValue * (1 / tanso), (float) (slope * value + offset)));
                         xValue++;
                     }
                     addEntry(dataSets.get(i), entries);
@@ -741,10 +744,10 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         if (phantich == 2) {
             float xmin = lineChart.getLowestVisibleX();
             float xmax = lineChart.getHighestVisibleX();
-            LimitLine limitLine1 = new LimitLine(xmin, "");
+            LimitLine limitLine1 = new LimitLine((xmax - xmin) / 4, "");
             limitLine1.setLineColor(Color.BLACK);
             limitLine1.setLineWidth(1f);
-            LimitLine limitLine2 = new LimitLine(xmax, "");
+            LimitLine limitLine2 = new LimitLine((xmax - xmin) * 3 / 4, "");
             limitLine2.setLineColor(Color.BLACK);
             limitLine2.setLineWidth(1f);
             lineChart.getXAxis().addLimitLine(limitLine1);
@@ -763,10 +766,10 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         if (phantich == 3) {
             float xmin = lineChart.getLowestVisibleX();
             float xmax = lineChart.getHighestVisibleX();
-            LimitLine limitLine1 = new LimitLine(xmin, "");
+            LimitLine limitLine1 = new LimitLine((xmax - xmin) / 4, "");
             limitLine1.setLineColor(Color.BLACK);
             limitLine1.setLineWidth(1f);
-            LimitLine limitLine2 = new LimitLine(xmax, "");
+            LimitLine limitLine2 = new LimitLine((xmax - xmin) * 3 / 4, "");
             limitLine2.setLineColor(Color.BLACK);
             limitLine2.setLineWidth(1f);
             lineChart.getXAxis().addLimitLine(limitLine1);
@@ -785,10 +788,10 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         if (phantich == 4) {
             float xmin = lineChart.getLowestVisibleX();
             float xmax = lineChart.getHighestVisibleX();
-            LimitLine limitLine1 = new LimitLine(xmin, "");
+            LimitLine limitLine1 = new LimitLine((xmax - xmin) / 4, "");
             limitLine1.setLineColor(Color.BLACK);
             limitLine1.setLineWidth(1f);
-            LimitLine limitLine2 = new LimitLine(xmax, "");
+            LimitLine limitLine2 = new LimitLine((xmax - xmin) * 3 / 4, "");
             limitLine2.setLineColor(Color.BLACK);
             limitLine2.setLineWidth(1f);
             lineChart.getXAxis().addLimitLine(limitLine1);
@@ -807,10 +810,10 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         if (phantich == 5) {
             float xmin = lineChart.getLowestVisibleX();
             float xmax = lineChart.getHighestVisibleX();
-            LimitLine limitLine1 = new LimitLine(xmin, "");
+            LimitLine limitLine1 = new LimitLine((xmax - xmin) / 4, "");
             limitLine1.setLineColor(Color.BLACK);
             limitLine1.setLineWidth(1f);
-            LimitLine limitLine2 = new LimitLine(xmax, "");
+            LimitLine limitLine2 = new LimitLine((xmax - xmin) * 3 / 4, "");
             limitLine2.setLineColor(Color.BLACK);
             limitLine2.setLineWidth(1f);
             lineChart.getXAxis().addLimitLine(limitLine1);
@@ -829,10 +832,10 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         if (phantich == 6) {
             float xmin = lineChart.getLowestVisibleX();
             float xmax = lineChart.getHighestVisibleX();
-            LimitLine limitLine1 = new LimitLine(xmin, "");
+            LimitLine limitLine1 = new LimitLine((xmax - xmin) / 4, "");
             limitLine1.setLineColor(Color.BLACK);
             limitLine1.setLineWidth(1f);
-            LimitLine limitLine2 = new LimitLine(xmax, "");
+            LimitLine limitLine2 = new LimitLine((xmax - xmin) * 3 / 4, "");
             limitLine2.setLineColor(Color.BLACK);
             limitLine2.setLineWidth(1f);
             lineChart.getXAxis().addLimitLine(limitLine1);
@@ -996,5 +999,16 @@ public class FragmentDothi extends Fragment implements FragmentBaseMain.OnDataCh
         }
 
         return result;
+    }
+    private boolean isChartDataValid(LineChart chart) {
+        LineData data = chart.getLineData();
+        if (data == null || data.getDataSetCount() == 0) return false;
+
+        for (int i = 0; i < data.getDataSetCount(); i++) {
+            IDataSet dataSet = data.getDataSetByIndex(i);
+            if (dataSet == null || dataSet.getEntryCount() == 0) return false;
+        }
+
+        return true;
     }
 }

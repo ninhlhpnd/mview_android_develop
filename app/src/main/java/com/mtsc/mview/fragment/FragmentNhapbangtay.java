@@ -498,7 +498,7 @@ public class FragmentNhapbangtay extends Fragment {
 //                    Log.d("size", String.valueOf(mangValue.size()));
                 }
                 if (mangValueX.size() >= 200) {
-                    rmsFastX = rms(mangValueX);
+                    rmsFastX = getAverageRMS(mangValueX);
 //                    rmsFastX = (float) dataProcessorX.filter(rmsFastX);
                     DecimalFormat df;
                     if (tencambienX.equals("Dòng điện")) {
@@ -541,7 +541,7 @@ public class FragmentNhapbangtay extends Fragment {
                 }
                 if (mangvalueY.size() >= 200) {
 
-                    rmsFastY = (float) rms(mangvalueY);
+                    rmsFastY = (float) getAverageRMS(mangvalueY);
 //                    rmsFastY = (float) dataProcessorY.filter(rmsFastY);
                     DecimalFormat df;
                     if (tencambienY.equals("Dòng điện")) {
@@ -565,21 +565,50 @@ public class FragmentNhapbangtay extends Fragment {
         EventBus.getDefault().unregister(this);
 //        Log.d("life","onstop");
     }
-    private float rms(List<Float> value) {
-        float rms=0;
-//        float average = 0;
-//        for (float val : value) {
-//            average += val;
-//        }
-//        average /= value.size();
-//        for (int i = 0; i < value.size(); i++) {
-//            value.set(i, value.get(i) - average);
-//        }
-        for(float val : value){
-            rms += val * val;
+    public float getAverageRMS(List<Float> rawValues) {
+        // 1. Tính offset DC
+        float avg = 0;
+        for (float val : rawValues) avg += val;
+        avg /= rawValues.size();
+
+        // 2. Trừ offset
+        List<Float> values = new ArrayList<>();
+        for (float val : rawValues) values.add(val - avg);
+
+        // 3. Tìm điểm zero-crossing dương
+        List<Integer> zeroCrossings = new ArrayList<>();
+        for (int i = 1; i < values.size(); i++) {
+            if (values.get(i - 1) < 0 && values.get(i) >= 0) {
+                zeroCrossings.add(i);
+            }
         }
-        rms /= value.size();
-        rms = (float) Math.sqrt(rms);
-        return rms;
+
+        // 4. Kiểm tra đủ ít nhất 1 chu kỳ
+        if (zeroCrossings.size() < 2) {
+            return rms(values); // Không đủ 1 chu kỳ → dùng RMS toàn phần
+        }
+
+        // 5. Tính RMS từng chu kỳ
+        List<Float> rmsList = new ArrayList<>();
+        for (int i = 0; i < zeroCrossings.size() - 1; i++) {
+            int start = zeroCrossings.get(i);
+            int end = zeroCrossings.get(i + 1);
+            List<Float> cycle = values.subList(start, end);
+            rmsList.add(rms(cycle));
+        }
+
+        // 6. Trung bình RMS
+        float sum = 0;
+        for (float r : rmsList) sum += r;
+        return sum / rmsList.size();
     }
+
+    // Hàm RMS không cần trừ offset nữa (đã trừ ở bước trước)
+    private float rms(List<Float> value) {
+        float rms = 0;
+        for (float val : value) rms += val * val;
+        rms /= value.size();
+        return (float) Math.sqrt(rms);
+    }
+
 }

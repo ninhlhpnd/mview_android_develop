@@ -1,5 +1,7 @@
 package com.mtsc.mview.fragment;
 
+import static com.mtsc.mview.MainActivity.trangThai;
+
 import android.content.Context;
 import android.os.Bundle;
 
@@ -31,11 +33,13 @@ import com.mtsc.mview.MainActivity;
 import com.mtsc.mview.R;
 import com.mtsc.mview.adapter.chonsodoAdapter;
 import com.mtsc.mview.adapter.chonsodoAdapterUSB;
+import com.mtsc.mview.adapter.sodoLichsuAdapter;
 import com.mtsc.mview.model.CamBien;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.DulieuCacCamBien;
 import com.mtsc.mview.model.Run;
 import com.mtsc.mview.model.SensorData;
+import com.mtsc.mview.model.TrangThaiKetNoi;
 import com.mtsc.mview.ultis.DataEvent;
 import com.mtsc.mview.ultis.Uuid;
 
@@ -90,7 +94,7 @@ public class FragmentBaseMain extends Fragment {
         imgChonhienthi = (ImageView) view.findViewById(R.id.imageview_chonkieuhienthi);
         frameLayout = (FrameLayout) view.findViewById(R.id.framelayout_fragmentbasemain);
         imgChonsodo = (ImageView) view.findViewById(R.id.imageview_Chonsodo);
-        imgSolanchay = (ImageView) view.findViewById(R.id.imageview_Solanchay);
+//        imgSolanchay = (ImageView) view.findViewById(R.id.imageview_Solanchay);
         imgPhantich = (ImageView) view.findViewById(R.id.imageview_Phantichdulieu);
         imgChonhienthi.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,12 +108,12 @@ public class FragmentBaseMain extends Fragment {
                 taoMenuChonsodo(view);
             }
         });
-        imgSolanchay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+//        imgSolanchay.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
 //                taoMenuSolanchay(view);
-            }
-        });
+//            }
+//        });
         imgPhantich.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,12 +196,15 @@ public class FragmentBaseMain extends Fragment {
         popupWindow.showAsDropDown(v);
         ListView lvSodo = (ListView) popupView.findViewById(R.id.listview_chonsodo);
         TextView txtEmpty = (TextView) popupView.findViewById(R.id.textviewEmpty_chonsodo);
-        if (MainActivity.isConnectedUSB) {
+        if (trangThai == TrangThaiKetNoi.USB) {
             chonsodoAdapterUSB chonsodoAdapterUSB = new chonsodoAdapterUSB(getContext(), R.layout.dong_popupwindowchonsodo, MainActivity.soCambienUSB);
             lvSodo.setAdapter(chonsodoAdapterUSB);
-        } else {
+        } else if(trangThai == TrangThaiKetNoi.BLE) {
             chonsodoAdapter chonsodoAdapter = new chonsodoAdapter(getContext(), R.layout.dong_popupwindowchonsodo, MainActivity.sodoCambienList);
             lvSodo.setAdapter(chonsodoAdapter);
+        }else if(trangThai == TrangThaiKetNoi.HISTORY){
+            sodoLichsuAdapter sodoLichsuAdapter = new sodoLichsuAdapter(getContext(),R.layout.dong_popupwindowchonsodo,MainActivity.allRuns.get(0).getSensors());
+            lvSodo.setAdapter(sodoLichsuAdapter);
         }
         lvSodo.setEmptyView(txtEmpty);
 

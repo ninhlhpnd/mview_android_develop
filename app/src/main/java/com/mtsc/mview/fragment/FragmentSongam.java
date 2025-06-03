@@ -317,7 +317,7 @@ public class FragmentSongam extends Fragment {
                 float biendo = (maxvalue - minvalue) / 2;
                 float phase = (float) ((-1 + Math.random() * 2) * 2 * Math.PI);
                 double A_min = 0.0;
-                double A_max = 1.65;
+                double A_max = 1.1;
                 double min_dB = 40.0;
                 double max_dB = 100.0;
                 int decibel = (int) convertAmplitudeToDecibel(biendo, A_min, A_max, min_dB, max_dB);

@@ -4,7 +4,9 @@ import com.mtsc.mview.MainActivity;
 import com.mtsc.mview.ultis.Uuid;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SensorData {
     private String sensorName;
@@ -26,17 +28,32 @@ public class SensorData {
     public void addValue(double value) {
         values.add(value);
     }
-    public String getDonvi(){
-        String donvi ="";
+    public Map<String,String[]> getSodo(){
+
+        Map<String, String[]> laySodo= new HashMap<>();
+
         int vitri = sensorName.indexOf('-');
         for (int i = 0; i < Uuid.camBiens.size(); i++) {
             if (Uuid.camBiens.get(i).getId().equals(sensorName.substring(0,vitri))) {
-                donvi = Uuid.camBiens.get(i).getDonvi()[0];
-
+                String[] donvi = Uuid.camBiens.get(i).getDonvi();
+                String tencambien = Uuid.camBiens.get(i).getName();
+                laySodo.put("donvi",donvi);
+                laySodo.put("tencb", new String[]{tencambien});
                 break;
             }
         }
-        return donvi;
+        return laySodo;
+    }
+    public  int getIcon(){
+        int icon = 0;
+        int vitri = sensorName.indexOf('-');
+        for (int i = 0; i < Uuid.camBiens.size(); i++) {
+            if (Uuid.camBiens.get(i).getId().equals(sensorName.substring(0,vitri))) {
+                icon= Uuid.camBiens.get(i).getIcon();
+                break;
+            }
+        }
+        return icon;
     }
 }
 
