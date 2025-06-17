@@ -77,6 +77,7 @@ import com.mtsc.mview.model.CamBien;
 import com.mtsc.mview.model.CamBienUSB;
 import com.mtsc.mview.model.ConnectedDevice;
 import com.mtsc.mview.model.CustomProber;
+import com.mtsc.mview.model.DeviceDataBuffer;
 import com.mtsc.mview.model.DulieuCB;
 import com.mtsc.mview.model.DulieuCacCamBien;
 import com.mtsc.mview.model.KalmanFilterWrapper;
@@ -87,6 +88,7 @@ import com.mtsc.mview.model.SodoCambien;
 import com.mtsc.mview.model.TrangThaiKetNoi;
 import com.mtsc.mview.model.sodoCambienUSB;
 import com.mtsc.mview.model.thanhcongcuClass;
+import com.mtsc.mview.my_interface.DataListener;
 import com.mtsc.mview.my_interface.ItemClickListener;
 import com.mtsc.mview.ultis.DataEvent;
 import com.mtsc.mview.ultis.Uuid;
@@ -121,11 +123,15 @@ import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements ItemClickListener, USBFragment.OnDataReceivedListener, BluetoothFragment.OnDeviceDisconnectedListener {
+public class MainActivity extends AppCompatActivity implements ItemClickListener, USBFragment.OnDataReceivedListener, BluetoothFragment.OnDeviceDisconnectedListener, DataListener {
     RecyclerView recyclerViewThanhcongcu;
-    Handler handler;
+    Handler handler, bleHandler;
     ArrayList<thanhcongcuClass> thanhcongcuClasses;
     com.mtsc.mview.adapter.thanhcongcuAdapter thanhcongcuAdapter;
     public static tbKetNoiAdapter tbKetnoiAdapter;
@@ -133,10 +139,11 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public static List<SodoCambien> sodoCambienList;
     FrameLayout frmFragment;
     FragmentManager fragmentManager;
-    Button btnStart, btnChontanso;
+    Button btnStart, btnChontanso, btnHieuchinh;
     boolean isStart = false;
     public static float thoigian = 0;
     public static double tansoLayMau = 1000;
+    private int timeBleHandler = 1000;
     public float solanchay = 0;
     public static List<Run> allRuns;
     public LichsuAdapter lichsuAdapter;
@@ -146,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public static List<CamBienUSB> tbScansUsb;
     public static List<sodoCambienUSB> soCambienUSB;
     public static List<ListItemUSB> tbUSB;
-    List<DulieuCacCamBien> listDulieucaccambien;
     private SerialInputOutputManager usbIoManager;
 
     //    public static List<KalmanFilterWrapper> kalmanFilterWrapperList;
@@ -159,6 +165,10 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     private int inputPos = 0, currentByte;
     private int bufferSize = 100;
     int chayCambien = 0;
+
+    private DeviceDataBuffer dataBufferBle;
+    private static final int BUFFER_SIZE = 10000; // Kích thước bộ đệm
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,227 +187,20 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                 isStart = !isStart;
                 if (isStart == true) {
                     if (trangThai == TrangThaiKetNoi.BLE) {
-                        Fragment currentFragment = fragmentManager.findFragmentById(R.id.layoutFragment_main);
-                        byte[] byteArray = new byte[6];
-                        if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam) {
-                            byteArray[0] = 0x03;
-                            byteArray[5] = 0x03;
-                            byte[] tempArray = ByteBuffer.allocate(4).putInt((int) (1000 / tansoLayMau)).array();
-                            System.arraycopy(tempArray, 0, byteArray, 1, tempArray.length);
-                        } else {
-                            byteArray[0] = 0x01;
-                            byteArray[5] = 0x03;
-                            byte[] tempArray = ByteBuffer.allocate(4).putInt((int) tansoLayMau).array();
-
-                            System.arraycopy(tempArray, 0, byteArray, 1, tempArray.length);
-                        }
-                        btnStart.setText("Dừng Lại");
-                        solanchay++;
-//                        Run currentRun = new Run((int) solanchay, 1000 / tansoLayMau);
-//                        if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam || currentFragment instanceof FragmentNhapbangtay) {
-//
-//                        } else {
-//                            allRuns.add(currentRun);
-//                        }
-                        List<Float> manglanchay = new ArrayList<>();
-                        manglanchay.add(solanchay);
-                        manglanchay.add((float) tansoLayMau);
-                        DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
-                        EventBus.getDefault().post(new DataEvent(dulieuCB));
-
-                        int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
-                        btnStart.setBackgroundColor(colorDo);
-                        btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
-                        for (ConnectedDevice connectedDevice : tbKetnois) {
-                            final BleDevice bleDevice = connectedDevice.getDevice();
-//                            SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
-
-//                            if (sensorData == null) {
-//                            SensorData sensorData = new SensorData(connectedDevice.getDevice().getName());
-//                            currentRun.addSensorData(sensorData);
-//                            }
-//                            SensorData finalSensorData = sensorData;
-                            BleManager.getInstance().write(connectedDevice.getDevice(), connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
-                                @Override
-                                public void onWriteSuccess(int current, int total, byte[] justWrite) {
-
-//                                for (BleDevice bleDevice: tbKetnois
-//                                ) {
-
-                                    BleManager.getInstance().notify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), new BleNotifyCallback() {
-                                        @Override
-                                        public void onNotifySuccess() {
-
-                                        }
-
-                                        @Override
-                                        public void onNotifyFailure(BleException exception) {
-
-                                        }
-
-                                        @Override
-                                        public void onCharacteristicChanged(byte[] data) {
-                                            int vitri = bleDevice.getName().indexOf('-');
-
-                                            if (data != null) {
-                                                if (data[0] == 0x02 && data[data.length - 1] == 0x03) {
-//                                                    for(int i=0;i<data.length;i++){
-//                                                        Log.d("dulieu",String.valueOf(data[i]));
-//                                                    }
-                                                    if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
-                                                        List<Float> mangAp = new ArrayList<>();
-                                                        List<Float> mangDong = new ArrayList<>();
-                                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                                            float dienap = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                                            mangAp.add(dienap);
-                                                            float dongdien = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                                            mangDong.add(dongdien);
-                                                        }
-                                                        DulieuCB dulieuAp = new DulieuCB(bleDevice.getName(), Uuid.Voltage, mangAp);
-                                                        DulieuCB dulieuDong = new DulieuCB(bleDevice.getName(), Uuid.Current, mangDong);
-                                                        EventBus.getDefault().post(new DataEvent(dulieuAp));
-                                                        EventBus.getDefault().post(new DataEvent(dulieuDong));
-                                                    } else if (bleDevice.getName().substring(0, vitri).equals("P&T") && data.length >= 10) {
-                                                        List<Float> mangApsuat = new ArrayList<>();
-                                                        List<Float> mangNhietdo = new ArrayList<>();
-                                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                                            float apsuat = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                                            mangApsuat.add(apsuat);
-                                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                                            mangNhietdo.add(nhietdo);
-                                                        }
-                                                        DulieuCB dulieuApsuat = new DulieuCB(bleDevice.getName(), Uuid.Pressure, mangApsuat);
-                                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
-                                                        EventBus.getDefault().post(new DataEvent(dulieuApsuat));
-                                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
-                                                    } else if (bleDevice.getName().substring(0, vitri).equals("H&T") && data.length >= 10) {
-                                                        List<Float> mangDoam = new ArrayList<>();
-                                                        List<Float> mangNhietdo = new ArrayList<>();
-                                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                                            float doam = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                                            mangDoam.add(doam);
-                                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                                            mangNhietdo.add(nhietdo);
-                                                        }
-                                                        DulieuCB dulieuDoam = new DulieuCB(bleDevice.getName(), Uuid.Humid, mangDoam);
-                                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
-                                                        EventBus.getDefault().post(new DataEvent(dulieuDoam));
-                                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
-                                                    } else {
-                                                        int vtrithietbi = 0;
-                                                        for (int i = 0; i < sodoCambienList.size(); i++) {
-                                                            if (sodoCambienList.get(i).getBleDevice() == bleDevice) {
-                                                                vtrithietbi = i;
-                                                                break;
-                                                            }
-                                                        }
-                                                        List<Float> mangValue = new ArrayList<>();
-
-                                                        for (int i = 0; i < (data.length - 2) / 4; i++) {
-                                                            float value = ByteBuffer.wrap(data, i * 4 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                                            mangValue.add(value);
-//                                                            if(listDulieucaccambien.size()<=10000) {
-//                                                                listDulieucaccambien.add(new DulieuCacCamBien(1, (float) tansoLayMau, bleDevice.getName(), value));
-//                                                            }
-//                                                            Log.d("data", String.valueOf(value));
-//                                                            sensorData.addValue(value);
-                                                        }
-
-                                                        DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
-                                                        EventBus.getDefault().post(new DataEvent(dulieuCB1));
-                                                    }
-
-
-//                                        listDulieuCambien.put(bleDevice.getName(),value);
-                                                }
-                                            }
-
-                                        }
-                                    });
-//                                }
-                                }
-
-                                @Override
-                                public void onWriteFailure(BleException exception) {
-
-                                }
-                            });
-                        }
+                        handleStartBLE();
                     } else if (trangThai == TrangThaiKetNoi.USB) {
-                        List<Float> manglanchay = new ArrayList<>();
-                        manglanchay.add(solanchay);
-                        manglanchay.add((float) tansoLayMau);
-                        DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
-                        EventBus.getDefault().post(new DataEvent(dulieuCB));
-
-                        btnStart.setText("Dừng Lại");
-                        int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
-                        btnStart.setBackgroundColor(colorDo);
-                        btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
-//                        Log.d("tag", tbScans.get(0).getCamBien().getName());
-//                        getUSBSerial();
-
-//                        usbIoManager = new SerialInputOutputManager(usbSerialPort,MainActivity.this);
-//                        usbIoManager.start();
-                        timer1 = new Timer();
-                        chayCambien = 0;
-
-                        timer1.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                int tenCambien = Uuid.camBiens.indexOf(tbScansUsb.get(chayCambien).getCamBien()) + 1;
-                                int idCambien = tbScansUsb.get(chayCambien).getId();
-                                byte[] data = {(byte) tenCambien, (byte) idCambien, 0x02};
-                                byte[] senddata = new byte[10];
-                                senddata[0] = 0x02;
-                                senddata[1] = (byte) firstNibble(data[0]);
-                                senddata[2] = (byte) secondNibble(data[0]);
-                                senddata[3] = (byte) firstNibble(data[1]);
-                                senddata[4] = (byte) secondNibble(data[1]);
-                                senddata[5] = (byte) firstNibble(data[2]);
-                                senddata[6] = (byte) secondNibble(data[2]);
-                                senddata[7] = 0x03;
-                                int crc = crc8(data, data.length);
-                                senddata[8] = (byte) firstNibble(crc);
-                                senddata[9] = (byte) secondNibble(crc);
-                                send(senddata);
-                                chayCambien = (chayCambien + 1) % tbScansUsb.size();
-                            }
-                        }, 0, (long) (tansoLayMau / tbScansUsb.size()));
-
+                        handleStartUSB();
                     }
                 } else {
                     btnStart.setText("Bắt Đầu ");
                     int colorXanh = ContextCompat.getColor(getBaseContext(), R.color.xanhduongnhat);
                     btnStart.setBackgroundColor(colorXanh);
                     btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_start, 0, 0, 0);
-                    listDulieucaccambien.clear();
                     if (trangThai == TrangThaiKetNoi.BLE) {
-                        byte[] byteArray = new byte[6];
-                        byteArray[0] = 0x02;
-                        byteArray[1] = 0x79;
-                        byteArray[5] = 0x03;
-                        for (ConnectedDevice connectedDevice : tbKetnois) {
-                            final BleDevice bleDevice = connectedDevice.getDevice();
-                            BleManager.getInstance().write(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
-                                @Override
-                                public void onWriteSuccess(int current, int total, byte[] justWrite) {
-                                    BleManager.getInstance().stopNotify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid());
-                                }
-
-                                @Override
-                                public void onWriteFailure(BleException exception) {
-
-                                }
-                            });
-                        }
+                        handleStopBLE();
                     } else if (trangThai == TrangThaiKetNoi.USB) {
 //                        Log.d("tag", tbScans.get(0).getCamBien().getName() + " cancle");
-                        timer1.cancel();
-
+                        handleStopUSB();
                     }
                 }
             }
@@ -454,14 +257,19 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                                 break;
                         }
                         btnChontanso.setText("Tần Số: " + (int) (1000 / tansoLayMau) + "Hz");
-
+                        timeBleHandler = tansoLayMau > 200 ? (int) tansoLayMau : 200;
                         return false;
                     }
                 });
             }
         });
+        btnHieuchinh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hieuChinhCamBien();
+            }
+        });
     }
-
 
     private void hideNavigationBar() {
         View decorView = getWindow().getDecorView();
@@ -477,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         thanhcongcuClasses.add(new thanhcongcuClass(1, R.drawable.bluetooth, "Bluetooth"));
         thanhcongcuClasses.add(new thanhcongcuClass(2, R.drawable.icon_usb, "USB"));
         thanhcongcuClasses.add(new thanhcongcuClass(3, R.drawable.home, "Home"));
-        thanhcongcuClasses.add(new thanhcongcuClass(4, R.drawable.tool, "Công cụ"));
+//        thanhcongcuClasses.add(new thanhcongcuClass(4, R.drawable.tool, "Công cụ"));
         thanhcongcuClasses.add(new thanhcongcuClass(5, R.drawable.bocuc, "Bố cục"));
         thanhcongcuClasses.add(new thanhcongcuClass(6, R.drawable.file_icon, "Lịch sử"));
 
@@ -485,23 +293,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         recyclerViewThanhcongcu.setHasFixedSize(true);
         recyclerViewThanhcongcu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         recyclerViewThanhcongcu.setAdapter(thanhcongcuAdapter);
-        Uuid.camBiens.add(new CamBien("Temp", Uuid.Temp, Uuid.dvTemp, Uuid.iconDevice[0], Uuid.hesoTemp, Uuid.tansoTemp, Uuid.daiDoTemp));
-        Uuid.camBiens.add(new CamBien("Humid", Uuid.Humid, Uuid.dvHumid, Uuid.iconDevice[1], Uuid.hesoHumid, Uuid.tansoHumid, Uuid.daiDoHumid));
-        Uuid.camBiens.add(new CamBien("Pressure", Uuid.Pressure, Uuid.dvPressure, Uuid.iconDevice[2], Uuid.hesoPressure, Uuid.tansoPressure, Uuid.daiDoPressure));
-        Uuid.camBiens.add(new CamBien("Oxygen", Uuid.Oxygen, Uuid.dvOxygen, Uuid.iconDevice[3], Uuid.hesoOxygen, Uuid.tansoOxygen, Uuid.daiDoOxygen));
-        Uuid.camBiens.add(new CamBien("CO2", Uuid.CO2, Uuid.dvCO2, Uuid.iconDevice[4], Uuid.hesoCO2, Uuid.tansoCO2, Uuid.daiDoCO2));
-        Uuid.camBiens.add(new CamBien("SoundI", Uuid.SoundI, Uuid.dvSoundI, Uuid.iconDevice[5], Uuid.hesoSoundI, Uuid.tansoSoundI, Uuid.daiDoSoundI));
-        Uuid.camBiens.add(new CamBien("PH", Uuid.PH, Uuid.dvPH, Uuid.iconDevice[6], Uuid.hesoPH, Uuid.tansoPH, Uuid.daiDoPH));
-        Uuid.camBiens.add(new CamBien("Salinity", Uuid.Salinity, Uuid.dvSalinity, Uuid.iconDevice[7], Uuid.hesoSalinity, Uuid.tansoSalinity, Uuid.daiDoSalinity));
-        Uuid.camBiens.add(new CamBien("DissolveOxy", Uuid.DissolveOxy, Uuid.dvDissolveOxy, Uuid.iconDevice[8], Uuid.hesoDissolveOxy, Uuid.tansoDissolveOxy, Uuid.daiDoDissolveOxy));
-        Uuid.camBiens.add(new CamBien("Force", Uuid.Force, Uuid.dvForce, Uuid.iconDevice[9], Uuid.hesoForce, Uuid.tansoForce, Uuid.daiDoForce));
-        Uuid.camBiens.add(new CamBien("Current", Uuid.Current, Uuid.dvCurrent, Uuid.iconDevice[10], Uuid.hesoCurrent, Uuid.tansoCurrent, Uuid.daiDoCurrent));
-        Uuid.camBiens.add(new CamBien("Voltage", Uuid.Voltage, Uuid.dvVoltage, Uuid.iconDevice[11], Uuid.hesoVoltage, Uuid.tansoVoltage, Uuid.daiDoVoltage));
-        Uuid.camBiens.add(new CamBien("SoundF", Uuid.Frequency, Uuid.dvFrequency, Uuid.iconDevice[12], Uuid.hesoFrequency, Uuid.tansoFrequency, Uuid.daiDoFrequency));
-        Uuid.camBiens.add(new CamBien("Distance", Uuid.Vitri, Uuid.dvVitri, Uuid.iconDevice[13], Uuid.hesoVitri, Uuid.tansoVitri, Uuid.daiDoVitri));
-        Uuid.camBiens.add(new CamBien("Conductivity", Uuid.Dodan, Uuid.dvDodan, Uuid.iconDevice[14], Uuid.hesoDodan, Uuid.tansoDodan, Uuid.daiDoDodan));
-        Uuid.camBiens.add(new CamBien("V&A", "Dòng Áp", null, Uuid.iconDevice[15], null, null, Uuid.daiDoDodan));
-        Uuid.camBiens.add(new CamBien("Light", Uuid.Dosang, Uuid.dvDosang, Uuid.iconDevice[16], Uuid.hesoDosang, Uuid.tansoDosang, Uuid.daiDoDosang));
 
         tbKetnoiAdapter = new tbKetNoiAdapter(MainActivity.this, R.layout.dong_thietbidaketnoi, tbKetnois);
         tbKetnoiAdapter.setOnDeviceClickListener(new tbKetNoiAdapter.OnDeviceClickListener() {
@@ -515,13 +306,14 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
         btnStart = (Button) findViewById(R.id.buttonBatdau_mainActivity);
         btnChontanso = (Button) findViewById(R.id.buttonChontanso_mainActivity);
+        btnHieuchinh= (Button) findViewById(R.id.buttonHieuchinh_mainActivity);
         tbUSB = new ArrayList<>();
         tbScansUsb = new ArrayList<>();
         soCambienUSB = new ArrayList<>();
-        listDulieucaccambien = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper());
         allRuns = new ArrayList<>();
         initUSB();
+
     }
 
     private void initBLE() {
@@ -591,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                 break;
             }
             case 4: {
-                hieuChinhCamBien();
+//                hieuChinhCamBien();
                 break;
             }
             case 5: {
@@ -1338,4 +1130,248 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                     .show();
         }
     }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+
+    @Override
+    public void onDataReceived(String deviceName, String sensorname, List<Float> value) {
+
+        DulieuCB dulieuCB = new DulieuCB(deviceName, sensorname, value);
+        EventBus.getDefault().post(new DataEvent(dulieuCB));
+    }
+
+    private void handleStartBLE() {
+        // All logic for starting BLE
+        // (move code from btnStart's BLE start block here)
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.layoutFragment_main);
+        byte[] byteArray = new byte[6];
+        if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam) {
+            byteArray[0] = 0x03;
+            byteArray[5] = 0x03;
+            byte[] tempArray = ByteBuffer.allocate(4).putInt((int) (1000 / tansoLayMau)).array();
+            System.arraycopy(tempArray, 0, byteArray, 1, tempArray.length);
+        } else {
+            byteArray[0] = 0x01;
+            byteArray[5] = 0x03;
+            byte[] tempArray = ByteBuffer.allocate(4).putInt((int) tansoLayMau).array();
+
+            System.arraycopy(tempArray, 0, byteArray, 1, tempArray.length);
+        }
+        btnStart.setText("Dừng Lại");
+        solanchay++;
+        Run currentRun = new Run((int) solanchay, 1000 / tansoLayMau);
+        if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam || currentFragment instanceof FragmentNhapbangtay) {
+
+        } else {
+            allRuns.add(currentRun);
+        }
+        List<Float> manglanchay = new ArrayList<>();
+        manglanchay.add(solanchay);
+        manglanchay.add((float) tansoLayMau);
+        DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
+        EventBus.getDefault().post(new DataEvent(dulieuCB));
+
+
+        int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
+        btnStart.setBackgroundColor(colorDo);
+        btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
+
+        for (ConnectedDevice connectedDevice : tbKetnois) {
+            final BleDevice bleDevice = connectedDevice.getDevice();
+             SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
+
+            if (sensorData == null) {
+                sensorData = new SensorData(connectedDevice.getDevice().getName());
+                currentRun.addSensorData(sensorData);
+            }
+            final SensorData finalSensorData = sensorData; // Để dùng trong callback
+
+            BleManager.getInstance().write(connectedDevice.getDevice(), connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
+                @Override
+                public void onWriteSuccess(int current, int total, byte[] justWrite) {
+
+
+                    BleManager.getInstance().notify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), new BleNotifyCallback() {
+                        @Override
+                        public void onNotifySuccess() {
+
+                        }
+
+                        @Override
+                        public void onNotifyFailure(BleException exception) {
+
+                        }
+
+                        @Override
+                        public void onCharacteristicChanged(byte[] data) {
+                            int vitri = bleDevice.getName().indexOf('-');
+
+                            if (data != null) {
+                                if (data[0] == 0x02 && data[data.length - 1] == 0x03) {
+//                                                    for(int i=0;i<data.length;i++){
+//                                                        Log.d("dulieu",String.valueOf(data[i]));
+//                                                    }
+                                    if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
+                                        List<Float> mangAp = new ArrayList<>();
+                                        List<Float> mangDong = new ArrayList<>();
+                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
+                                            float dienap = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                            mangAp.add(dienap);
+                                            float dongdien = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+//                                                        Log.d("dulieu",String.valueOf(dienap));
+                                            mangDong.add(dongdien);
+                                        }
+                                        DulieuCB dulieuAp = new DulieuCB(bleDevice.getName(), Uuid.Voltage, mangAp);
+                                        DulieuCB dulieuDong = new DulieuCB(bleDevice.getName(), Uuid.Current, mangDong);
+                                        EventBus.getDefault().post(new DataEvent(dulieuAp));
+                                        EventBus.getDefault().post(new DataEvent(dulieuDong));
+                                    } else if (bleDevice.getName().substring(0, vitri).equals("P&T") && data.length >= 10) {
+                                        List<Float> mangApsuat = new ArrayList<>();
+                                        List<Float> mangNhietdo = new ArrayList<>();
+                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
+                                            float apsuat = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                            mangApsuat.add(apsuat);
+                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+//                                                        Log.d("dulieu",String.valueOf(dienap));
+                                            mangNhietdo.add(nhietdo);
+                                        }
+                                        DulieuCB dulieuApsuat = new DulieuCB(bleDevice.getName(), Uuid.Pressure, mangApsuat);
+                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
+                                        EventBus.getDefault().post(new DataEvent(dulieuApsuat));
+                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
+                                    } else if (bleDevice.getName().substring(0, vitri).equals("H&T") && data.length >= 10) {
+                                        List<Float> mangDoam = new ArrayList<>();
+                                        List<Float> mangNhietdo = new ArrayList<>();
+                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
+                                            float doam = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                            mangDoam.add(doam);
+                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+//                                                        Log.d("dulieu",String.valueOf(dienap));
+                                            mangNhietdo.add(nhietdo);
+                                        }
+                                        DulieuCB dulieuDoam = new DulieuCB(bleDevice.getName(), Uuid.Humid, mangDoam);
+                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
+                                        EventBus.getDefault().post(new DataEvent(dulieuDoam));
+                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
+                                    } else {
+                                        int vtrithietbi = 0;
+                                        for (int i = 0; i < sodoCambienList.size(); i++) {
+                                            if (sodoCambienList.get(i).getBleDevice() == bleDevice) {
+                                                vtrithietbi = i;
+                                                break;
+                                            }
+                                        }
+                                        List<Float> mangValue = new ArrayList<>();
+
+                                        for (int i = 0; i < (data.length - 2) / 4; i++) {
+                                            float value = ByteBuffer.wrap(data, i * 4 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                            mangValue.add(value);
+                                            if (finalSensorData != null) {
+                                                finalSensorData.addValue(value); // Example value
+                                            }                                        }
+                                        DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
+                                        EventBus.getDefault().post(new DataEvent(dulieuCB1));
+                                    }
+
+
+                                }
+                            }
+
+                        }
+                    });
+//                                }
+                }
+
+                @Override
+                public void onWriteFailure(BleException exception) {
+
+                }
+            });
+        }
+    }
+
+    private void handleStopBLE() {
+        // All logic for stopping BLE
+        // (move code from btnStart's BLE stop block here)
+        byte[] byteArray = new byte[6];
+        byteArray[0] = 0x02;
+        byteArray[1] = 0x79;
+        byteArray[5] = 0x03;
+
+
+        for (ConnectedDevice connectedDevice : tbKetnois) {
+            final BleDevice bleDevice = connectedDevice.getDevice();
+            BleManager.getInstance().write(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
+                @Override
+                public void onWriteSuccess(int current, int total, byte[] justWrite) {
+                    BleManager.getInstance().stopNotify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid());
+                }
+
+                @Override
+                public void onWriteFailure(BleException exception) {
+
+                }
+            });
+        }
+    }
+
+    private void handleStartUSB() {
+        // All logic for starting USB
+        // (move code from btnStart's USB start block here)
+        List<Float> manglanchay = new ArrayList<>();
+        manglanchay.add(solanchay);
+        manglanchay.add((float) tansoLayMau);
+        DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
+        EventBus.getDefault().post(new DataEvent(dulieuCB));
+
+        btnStart.setText("Dừng Lại");
+        int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
+        btnStart.setBackgroundColor(colorDo);
+        btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
+//                        Log.d("tag", tbScans.get(0).getCamBien().getName());
+//                        getUSBSerial();
+
+//                        usbIoManager = new SerialInputOutputManager(usbSerialPort,MainActivity.this);
+//                        usbIoManager.start();
+        timer1 = new Timer();
+        chayCambien = 0;
+
+        timer1.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                int tenCambien = Uuid.camBiens.indexOf(tbScansUsb.get(chayCambien).getCamBien()) + 1;
+                int idCambien = tbScansUsb.get(chayCambien).getId();
+                byte[] data = {(byte) tenCambien, (byte) idCambien, 0x02};
+                byte[] senddata = new byte[10];
+                senddata[0] = 0x02;
+                senddata[1] = (byte) firstNibble(data[0]);
+                senddata[2] = (byte) secondNibble(data[0]);
+                senddata[3] = (byte) firstNibble(data[1]);
+                senddata[4] = (byte) secondNibble(data[1]);
+                senddata[5] = (byte) firstNibble(data[2]);
+                senddata[6] = (byte) secondNibble(data[2]);
+                senddata[7] = 0x03;
+                int crc = crc8(data, data.length);
+                senddata[8] = (byte) firstNibble(crc);
+                senddata[9] = (byte) secondNibble(crc);
+                send(senddata);
+                chayCambien = (chayCambien + 1) % tbScansUsb.size();
+            }
+        }, 0, (long) (tansoLayMau / tbScansUsb.size()));
+    }
+
+    private void handleStopUSB() {
+        // All logic for stopping USB
+        // (move code from btnStart's USB stop block here)
+        if (timer1 != null) {
+            timer1.cancel();
+        }
+    }
 }
+

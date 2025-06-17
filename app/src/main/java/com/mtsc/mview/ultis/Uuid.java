@@ -110,7 +110,6 @@ public class Uuid {
 
     public static String Vantoc="Vận tốc";
     public static String Giatoc="Gia tốc";
-    public static List<CamBien> camBiens=new ArrayList<>();
 
     public static String Dosang="Cường độ sáng";
     public static String[] dvDosang={"lux"};
@@ -122,5 +121,24 @@ public class Uuid {
             R.drawable.dissolved,R.drawable.force,R.drawable.current,R.drawable.voltage,R.drawable.soundf,
             R.drawable.distance,R.drawable.conductivity,R.drawable.dongap,R.drawable.anhsang };
 
-
+    public static List<CamBien> camBiens=new ArrayList<>();
+    static {
+        camBiens.add(new CamBien("Temp", Temp, dvTemp, iconDevice[0], hesoTemp, tansoTemp, daiDoTemp));
+        camBiens.add(new CamBien("Humid", Humid, dvHumid, iconDevice[1], hesoHumid, tansoHumid, daiDoHumid));
+        camBiens.add(new CamBien("Pressure", Pressure, dvPressure, iconDevice[2], hesoPressure, tansoPressure, daiDoPressure));
+        camBiens.add(new CamBien("Oxygen", Oxygen, dvOxygen, iconDevice[3], hesoOxygen, tansoOxygen, daiDoOxygen));
+        camBiens.add(new CamBien("CO2", CO2, dvCO2, iconDevice[4], hesoCO2, tansoCO2, daiDoCO2));
+        camBiens.add(new CamBien("SoundI", SoundI, dvSoundI, iconDevice[5], hesoSoundI, tansoSoundI, daiDoSoundI));
+        camBiens.add(new CamBien("PH", PH, dvPH, iconDevice[6], hesoPH, tansoPH, daiDoPH));
+        camBiens.add(new CamBien("Salinity", Salinity, dvSalinity, iconDevice[7], hesoSalinity, tansoSalinity, daiDoSalinity));
+        camBiens.add(new CamBien("DissolveOxy", DissolveOxy, dvDissolveOxy, iconDevice[8], hesoDissolveOxy, tansoDissolveOxy, daiDoDissolveOxy));
+        camBiens.add(new CamBien("Force", Force, dvForce, iconDevice[9], hesoForce, tansoForce, daiDoForce));
+        camBiens.add(new CamBien("Current", Current, dvCurrent, iconDevice[10], hesoCurrent, tansoCurrent, daiDoCurrent));
+        camBiens.add(new CamBien("Voltage", Voltage, dvVoltage, iconDevice[11], hesoVoltage, tansoVoltage, daiDoVoltage));
+        camBiens.add(new CamBien("SoundF", Frequency, dvFrequency, iconDevice[12], hesoFrequency, tansoFrequency, daiDoFrequency));
+        camBiens.add(new CamBien("Distance", Vitri, dvVitri, iconDevice[13], hesoVitri, tansoVitri, daiDoVitri));
+        camBiens.add(new CamBien("Conductivity", Dodan, dvDodan, iconDevice[14], hesoDodan, tansoDodan, daiDoDodan));
+        camBiens.add(new CamBien("V&A", "Dòng Áp", null, iconDevice[15], null, null, daiDoDodan));
+        camBiens.add(new CamBien("Light", Dosang, dvDosang, iconDevice[16], hesoDosang, tansoDosang, daiDoDosang));
+    }
 }

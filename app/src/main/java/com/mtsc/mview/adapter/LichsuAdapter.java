@@ -67,7 +67,7 @@ public class LichsuAdapter extends BaseAdapter {
         }
 
         Run currentRun=lichsuList.get(i);
-        viewHolder.txtLichsu.setText("Chạy " + currentRun.getRunNumber());
+        viewHolder.txtLichsu.setText("Chạy " + currentRun.getRunNumber() + " - " + (int)currentRun.getFrequency() + "Hz");
 
         view.setOnClickListener(v -> {
             if (listener != null) {
