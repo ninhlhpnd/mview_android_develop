@@ -55,11 +55,12 @@ public class FragmentMachDienXC extends Fragment {
     List<ILineDataSet> dataSets;
     TextView txtUtoado, txtUrms, txtUchenhlech, txtItoado, txtIrms, txtIchenhlech;
     LinearLayout layoutUToado, layoutUChenhlech, layoutURms, layoutIToado, layoutIChenhlech, layoutIRms;
-    DecimalFormat df2, df3;
+    DecimalFormat df2, df3, df4, df;
     SeekBar seekbarU, seekbarI;
     boolean isToado = false, isChenhlech = false, isRms = false;
     int kieuPhantich = 0;
-    int MAX_VALUES=200;
+    int MAX_VALUES = 400;
+
     public FragmentMachDienXC(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }
@@ -147,16 +148,27 @@ public class FragmentMachDienXC extends Fragment {
                             MPPointD point = lineChart.getValuesByTouchPoint(xTouch, yTouch, YAxis.AxisDependency.LEFT);
                             float xValue = (float) point.x;
                             LineData data = lineChart.getLineData();
-                            List<Entry> toadodiem = new ArrayList<>();
-                            Entry closestEntry = data.getDataSetByIndex(0).getEntryForXValue(xValue, Float.NaN, DataSet.Rounding.CLOSEST);
-                            Entry closestEntryI = data.getDataSetByIndex(1).getEntryForXValue(xValue, Float.NaN, DataSet.Rounding.CLOSEST);
+                            ILineDataSet dataSetU = data.getDataSetByIndex(0);
+                            ILineDataSet dataSetI = data.getDataSetByIndex(1);
+                            Entry closestEntry = null;
+                            Entry closestEntryI = null;
+                            if (dataSetU != null) {
+                                closestEntry = dataSetU.getEntryForXValue(xValue, Float.NaN, DataSet.Rounding.CLOSEST);
+                            }
 
-                            txtUtoado.setText("x:" + df3.format(closestEntry.getX()).replace(',', '.') + "s"
-                                    + " y:" + df2.format(closestEntry.getY()).replace(',', '.') + "V");
-
-                            txtItoado.setText("x:" + df3.format(closestEntryI.getX()).replace(',', '.') + "s"
-                                    + " y:" + df3.format(closestEntryI.getY()).replace(',', '.') + "A");
-
+                            if (dataSetI != null) {
+                                closestEntryI = dataSetI.getEntryForXValue(xValue, Float.NaN, DataSet.Rounding.CLOSEST);
+                            }
+                            if (closestEntry != null) {
+                                txtUtoado.setText("x:" + df.format(closestEntry.getX()).replace(',', '.') + "s"
+                                        + " y:" + df2.format(closestEntry.getY()).replace(',', '.') + "V");
+                            }
+                            if (closestEntryI != null) {
+                                txtItoado.setText("x:" + df.format(closestEntryI.getX()).replace(',', '.') + "s"
+                                        + " y:" + df3.format(closestEntryI.getY()).replace(',', '.') + "A");
+                            } else {
+                                txtItoado.setText("");
+                            }
                             lineChart.getXAxis().removeAllLimitLines();
                             // Tính toán lại vị trí của đường line
                             LimitLine limitLine = new LimitLine(closestEntry.getX(), "");
@@ -197,19 +209,31 @@ public class FragmentMachDienXC extends Fragment {
                             LimitLine gioihan2 = lineChart.getXAxis().getLimitLines().get(1);
                             lineChart.notifyDataSetChanged();
                             lineChart.invalidate();
+
                             Entry entry1 = data.getDataSetByIndex(0).getEntryForXValue(gioihan1.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
                             Entry entry2 = data.getDataSetByIndex(0).getEntryForXValue(gioihan2.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
                             float deltax = Math.abs(entry1.getX() - entry2.getX());
                             float deltay = Math.abs(entry1.getY() - entry2.getY());
-                            txtUchenhlech.setText("Δx:" + df3.format(deltax).replace(',', '.') + "s"
+                            txtUchenhlech.setText("Δx:" + df.format(deltax).replace(',', '.') + "s"
                                     + " Δy=" + df2.format(deltay).replace(',', '.') + "V");
 
-                            Entry entry1I = data.getDataSetByIndex(1).getEntryForXValue(gioihan1.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
-                            Entry entry2I = data.getDataSetByIndex(1).getEntryForXValue(gioihan2.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
-                            float deltaxI = Math.abs(entry1I.getX() - entry2I.getX());
-                            float deltayI = Math.abs(entry1I.getY() - entry2I.getY());
-                            txtIchenhlech.setText("Δx:" + df3.format(deltaxI).replace(',', '.') + "s"
-                                    + " Δy=" + df3.format(deltayI).replace(',', '.') + "A");
+                            ILineDataSet dataSetU = data.getDataSetByIndex(0);
+                            ILineDataSet dataSetI = data.getDataSetByIndex(1);
+                            Entry entry1I = null;
+                            Entry entry2I = null;
+
+                            if (dataSetI != null) {
+                                entry1I = data.getDataSetByIndex(1).getEntryForXValue(gioihan1.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
+                                entry2I = data.getDataSetByIndex(1).getEntryForXValue(gioihan2.getLimit(), Float.NaN, DataSet.Rounding.CLOSEST);
+                            }
+                            if (entry1I != null && entry2I != null) {
+                                float deltaxI = Math.abs(entry1I.getX() - entry2I.getX());
+                                float deltayI = Math.abs(entry1I.getY() - entry2I.getY());
+                                txtIchenhlech.setText("Δx:" + df.format(deltaxI).replace(',', '.') + "s"
+                                        + " Δy=" + df3.format(deltayI).replace(',', '.') + "A");
+                            } else {
+                                txtIchenhlech.setText("");
+                            }
                         }
                         if (kieuPhantich == 3) {
                             float xTouch = motionEvent.getX();
@@ -251,16 +275,23 @@ public class FragmentMachDienXC extends Fragment {
                             }
                             float Urms = RMSCalculate(dataPointU);
                             txtUrms.setText("Urms(V):" + df2.format(Urms).replace(',', '.') + "V");
+                            ILineDataSet dataSetI = data.getDataSetByIndex(1);
 
-                            List<Entry> dataPointI = new ArrayList<>();
-                            for (int i = 0; i < dataSets.get(1).getEntryCount(); i++) {
-                                Entry entry = data.getDataSetByIndex(1).getEntryForIndex(i);
-                                if (entry.getX() >= xmin && entry.getX() <= xmax) {
-                                    dataPointI.add(entry);
+
+                            if (dataSetI != null) {
+                                List<Entry> dataPointI = new ArrayList<>();
+                                for (int i = 0; i < dataSetI.getEntryCount(); i++) {
+                                    Entry entry = dataSetI.getEntryForIndex(i);
+                                    if (entry.getX() >= xmin && entry.getX() <= xmax) {
+                                        dataPointI.add(entry);
+                                    }
                                 }
+                                float Irms = RMSCalculate(dataPointI);
+                                txtIrms.setText("Irms(A):" + df3.format(Irms).replace(',', '.') + "A");
+                            } else {
+                                txtIrms.setText("");
                             }
-                            float Irms = RMSCalculate(dataPointI);
-                            txtIrms.setText("Irms(A):" + df3.format(Irms).replace(',', '.') + "A");
+
 
                             lineChart.notifyDataSetChanged();
                             lineChart.invalidate();
@@ -451,9 +482,10 @@ public class FragmentMachDienXC extends Fragment {
         entryListDong = new ArrayList<>();
         df2 = new DecimalFormat("#.00");
         df3 = new DecimalFormat("#.000");
+        df4 = new DecimalFormat("#.0000");
         df2.setMinimumIntegerDigits(1);
         df3.setMinimumIntegerDigits(1);
-
+        df4.setMinimumIntegerDigits(1);
     }
 
     public void khoitaodothi() {
@@ -482,7 +514,7 @@ public class FragmentMachDienXC extends Fragment {
         x1.setAvoidFirstLastClipping(true);
         x1.setEnabled(true);
         x1.setAxisMinimum(0f);
-        x1.setAxisMaximum((float) (MAX_VALUES*0.001));
+        x1.setAxisMaximum((float) (MAX_VALUES * 0.001));
         x1.setSpaceMin(0.05f);
 
         YAxis leftAxis = lineChart.getAxisLeft();
@@ -498,6 +530,18 @@ public class FragmentMachDienXC extends Fragment {
         rightAxis.setDrawGridLines(true);
         dataSets.add(creatSet("Điện áp", Color.RED, YAxis.AxisDependency.LEFT));
         dataSets.add(creatSet("Dòng điện", Color.BLACK, YAxis.AxisDependency.RIGHT));
+    }
+
+    private void changeXLinechart() {
+        XAxis x1 = lineChart.getXAxis();
+        x1.setAxisMinimum(0f);
+        x1.setAxisMaximum((float) (MAX_VALUES * 0.001 * MainActivity.tansoLayMau));
+        x1.setSpaceMin(0.05f);
+        if (MainActivity.tansoLayMau < 1) {
+            df = df4;
+        } else {
+            df = df3;
+        }
     }
 
     private LineDataSet creatSet(String lable, int color, YAxis.AxisDependency axisDependency) {
@@ -538,16 +582,16 @@ public class FragmentMachDienXC extends Fragment {
 //            set.addEntry(new Entry(xValue, yValue));
             data.notifyDataChanged();
 //            lineChart.setVisibleXRangeMaximum(xValue + 5f);
-            lineChart.isAutoScaleMinMaxEnabled();
-            float xValueMax = entries.get(entries.size() - 1).getX();
+//            lineChart.isAutoScaleMinMaxEnabled();
+//            float xValueMax = entries.get(entries.size() - 1).getX();
 
-            lineChart.moveViewToX(xValueMax);
+//            lineChart.moveViewToX(xValueMax);
 //            lineChart.setVisibleYRangeMaximum(yValue + 5f, YAxis.AxisDependency.LEFT);
-            YAxis leftAxis = lineChart.getAxisLeft();
-            float maxY = Math.max(leftAxis.getAxisMaximum(), getMaxYValue(entries) + 1f); // Lấy giá trị lớn nhất của trục Y
-            float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
-            leftAxis.setAxisMinimum(minY);
-            leftAxis.setAxisMaximum(maxY);
+//            YAxis leftAxis = lineChart.getAxisLeft();
+//            float maxY = Math.max(leftAxis.getAxisMaximum(), getMaxYValue(entries) + 1f); // Lấy giá trị lớn nhất của trục Y
+//            float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
+//            leftAxis.setAxisMinimum(minY);
+//            leftAxis.setAxisMaximum(maxY);
 //            lineChart.getAxisRight().setAxisMaximum(maxY);
 //            lineChart.getAxisRight().setAxisMinimum(minY);
             lineChart.notifyDataSetChanged();
@@ -595,6 +639,7 @@ public class FragmentMachDienXC extends Fragment {
         if (dulieuCB.getMacambien().equals("lanchay")) {
             entryListAp.clear();
             entryListDong.clear();
+            changeXLinechart();
         } else {
             if (dulieuCB.getTencambien().equals("Dòng điện")) {
                 List<Float> value = dulieuCB.getGiatricambien();
@@ -603,12 +648,13 @@ public class FragmentMachDienXC extends Fragment {
                     entryListDong.add(yvalue);
                 }
                 if (entryListDong.size() >= MAX_VALUES) {
-                    double[] sinwave = fft(entryListDong, (MainActivity.tansoLayMau / 1000.0), MAX_VALUES);
+//                    double[] sinwave = fft(entryListDong, (MainActivity.tansoLayMau / 1000.0), MAX_VALUES);
                     dataSets.get(1).clear();
                     List<Entry> dongentry = new ArrayList<>();
                     for (int i = 0; i < MAX_VALUES; i++) {
                         float xvalue = (float) (i * (MainActivity.tansoLayMau / 1000.0));
-                        float yvalue = (float) (sinwave[0] * Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2] - 0.26));
+//                        float yvalue = (float) (sinwave[0] * Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2] - 0.26));
+                        float yvalue = entryListDong.get(i);
                         dongentry.add(new Entry(xvalue, yvalue));
                     }
                     addEntry(dataSets.get(1), dongentry);
@@ -621,31 +667,16 @@ public class FragmentMachDienXC extends Fragment {
                     entryListAp.add(yvalue);
                 }
                 if (entryListAp.size() >= MAX_VALUES) {
-                    double[] sinwave = fft(entryListAp, (MainActivity.tansoLayMau / 1000.0), MAX_VALUES);
+//                    double[] sinwave = fft(entryListAp, (MainActivity.tansoLayMau / 1000.0), MAX_VALUES);
                     dataSets.get(0).clear();
                     List<Entry> apentry = new ArrayList<>();
 
-                    int signalType = (int) sinwave[3]; // Loại tín hiệu
-                    for (int i = 0; i < MAX_VALUES; i++) {
+//                    int signalType = (int) sinwave[3]; // Loại tín hiệu
+                    for (int i = 0; i < entryListAp.size(); i++) {
                         float xvalue = (float) (i * (MainActivity.tansoLayMau / 1000.0));
-                        float sinValue = (float) Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2]);
-                        float yvalue;
+//                        float sinValue = (float) Math.sin(2 * Math.PI * sinwave[1] * xvalue + sinwave[2]);
+                        float yvalue = entryListAp.get(i);
 
-                        switch (signalType) {
-                            case 0: // Hình sin chuẩn
-                                yvalue = (float) (sinwave[0] * sinValue);
-                                break;
-                            case 1: // Chỉnh lưu đơn (Giữ nguyên phần dương, phần âm thành 0)
-                                yvalue = (sinValue >= 0) ? (float) (sinwave[0] * sinValue) : 0;
-                                break;
-                            case 2: // Chỉnh lưu cầu (Lấy tuyệt đối)
-                                yvalue = (float) (sinwave[0] * Math.abs(sinValue));
-                                break;
-                            case 3: // Tín hiệu gần 0
-                            default:
-                                yvalue = 0; // Đường phẳng
-                                break;
-                        }
                         apentry.add(new Entry(xvalue, yvalue));
                     }
                     addEntry(dataSets.get(0), apentry);
@@ -895,9 +926,9 @@ public class FragmentMachDienXC extends Fragment {
         int type = classifyWaveform(smooth);
         float phase = estimatePhase(smooth, sampleRateHz, frequency);
 
-        Log.d("data","Biên độ: " + amplitude);
-        Log.d("data","Tần số: " + frequency + " Hz");
-        Log.d("data","Pha (rad): " + phase);
-        Log.d("data","Dạng sóng: " + type);
+        Log.d("data", "Biên độ: " + amplitude);
+        Log.d("data", "Tần số: " + frequency + " Hz");
+        Log.d("data", "Pha (rad): " + phase);
+        Log.d("data", "Dạng sóng: " + type);
     }
 }

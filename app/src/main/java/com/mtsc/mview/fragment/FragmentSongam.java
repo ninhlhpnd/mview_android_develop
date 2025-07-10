@@ -58,9 +58,13 @@ public class FragmentSongam extends Fragment {
     LinearLayout layoutToado;
     DecimalFormat df2, df3, df1;
     Spinner spinner;
-    int MAX_VALUES = 1000;
+    int MAX_VALUES = 512;
     boolean isTansoSongam = true;
     SeekBar seekBar;
+    float maxYValue = 10f;
+    float minYValue = -10f;
+    float sampleTime = 0.1f / 1000; // Tần số lấy mẫu 20Hz tương đương với 0.05 giây
+    int expectedPackIndex = 1; // Biến toàn cục hoặc thuộc class
 
     public FragmentSongam(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
@@ -97,11 +101,11 @@ public class FragmentSongam extends Fragment {
                     isTansoSongam = true;
                     dataSets.get(0).clear();
                     YAxis leftAxis = lineChart.getAxisLeft();
-                    leftAxis.setAxisMaximum(4f);
-                    leftAxis.setAxisMinimum(0f);
+                    leftAxis.setAxisMaximum(maxYValue);
+                    leftAxis.setAxisMinimum(minYValue);
                     XAxis x1 = lineChart.getXAxis();
-                    x1.setAxisMaximum(0.2f);
-                    x1.setSpaceMin(0.001f);
+                    x1.setAxisMaximum(sampleTime * MAX_VALUES);
+//                    x1.setSpaceMin(0.001f);
                 } else if (selectedItem.equals("Tốc độ truyền âm")) {
                     isTansoSongam = false;
                     dataSets.get(0).clear();
@@ -119,7 +123,8 @@ public class FragmentSongam extends Fragment {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float[] range = {0.2f, 0.1f, 0.05f, 0.02f, 0.01f};
+                float maxRange = sampleTime * MAX_VALUES;
+                float[] range = {maxRange, maxRange * 3 / 4, maxRange / 2, maxRange / 4, maxRange / 5, maxRange / 10};
                 if (isTansoSongam) {
                     lineChart.getXAxis().setAxisMaximum(range[progress - 1]);
                     lineChart.notifyDataSetChanged();
@@ -168,7 +173,7 @@ public class FragmentSongam extends Fragment {
         lineChart.setTouchEnabled(true);
         lineChart.setDragEnabled(true);
         lineChart.setScaleEnabled(true);
-        lineChart.setDrawGridBackground(false);
+//        lineChart.setDrawGridBackground(false);
         lineChart.setPinchZoom(false);
         lineChart.setBackgroundColor(Color.WHITE);
         lineChart.setDrawGridBackground(true);
@@ -189,13 +194,13 @@ public class FragmentSongam extends Fragment {
         x1.setAvoidFirstLastClipping(true);
         x1.setEnabled(true);
         x1.setAxisMinimum(0f);
-        x1.setAxisMaximum(0.2f);
-        x1.setSpaceMin(0.001f);
+        x1.setAxisMaximum(sampleTime * MAX_VALUES);
+        x1.setSpaceMin(sampleTime * MAX_VALUES / 20f);
 
         YAxis leftAxis = lineChart.getAxisLeft();
         leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setAxisMaximum(4f);
-        leftAxis.setAxisMinimum(0f);
+        leftAxis.setAxisMaximum(maxYValue);
+        leftAxis.setAxisMinimum(minYValue);
         leftAxis.setDrawGridLines(true);
 
         dataSets.add(creatSet("Sóng âm", Color.RED, YAxis.AxisDependency.LEFT));
@@ -238,17 +243,17 @@ public class FragmentSongam extends Fragment {
             }
 //            set.addEntry(new Entry(xValue, yValue));
             data.notifyDataChanged();
-            lineChart.isAutoScaleMinMaxEnabled();
+//            lineChart.isAutoScaleMinMaxEnabled();
             float xValueMax = entries.get(entries.size() - 1).getX();
 //            lineChart.setVisibleXRangeMaximum(xValueMax + 1f);
-            lineChart.moveViewToX(xValueMax);
+//            lineChart.moveViewToX(xValueMax);
 //            lineChart.getXAxis().setAxisMaximum(xValueMax);
 //            lineChart.setVisibleYRangeMaximum(yValue + 5f, YAxis.AxisDependency.LEFT);
-            YAxis leftAxis = lineChart.getAxisLeft();
-            float maxY = Math.max(leftAxis.getAxisMaximum(), getMaxYValue(entries) + 1f); // Lấy giá trị lớn nhất của trục Y
-            float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
-            leftAxis.setAxisMinimum(minY);
-            leftAxis.setAxisMaximum(maxY);
+//            YAxis leftAxis = lineChart.getAxisLeft();
+//            float maxY = Math.max(leftAxis.getAxisMaximum(), getMaxYValue(entries) + 1f); // Lấy giá trị lớn nhất của trục Y
+//            float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
+//            leftAxis.setAxisMinimum(minY);
+//            leftAxis.setAxisMaximum(maxY);
             if (!isTansoSongam) {
                 lineChart.getXAxis().setAxisMaximum(xValueMax + 1f);
             }
@@ -308,122 +313,71 @@ public class FragmentSongam extends Fragment {
 
         } else {
 
-            if (dulieuCB.getTencambien().equals("Tần số")) {
-                List<Float> value = dulieuCB.getGiatricambien();
-                float tanso = value.get(0);
-                float maxvalue = value.get(1);
-                float minvalue = value.get(2);
-                float zerovalue = (minvalue + maxvalue) / 2;
-                float biendo = (maxvalue - minvalue) / 2;
-                float phase = (float) ((-1 + Math.random() * 2) * 2 * Math.PI);
-                double A_min = 0.0;
-                double A_max = 1.1;
-                double min_dB = 40.0;
-                double max_dB = 100.0;
-                int decibel = (int) convertAmplitudeToDecibel(biendo, A_min, A_max, min_dB, max_dB);
+//            if (dulieuCB.getTencambien().equals("Tần số")) {
+            String packetStr = dulieuCB.getTencambien();
+            int packIndex = Integer.parseInt(packetStr);
+//            Log.d("dulieu",packetStr);
+            if (packIndex != expectedPackIndex) {
+                mangSongam.clear();
+                expectedPackIndex = 1;
+                return;
+            }
+            List<Float> value = dulieuCB.getGiatricambien();
 
-                float step = lineChart.getXAxis().getAxisMaximum() / MAX_VALUES;
+            for (float yvalue : value
+            ) {
+                mangSongam.add(yvalue);
+            }
+            expectedPackIndex++;
+            if (mangSongam.size() == MAX_VALUES) {
+                fft(mangSongam, sampleTime, mangSongam.size());
                 if (isTansoSongam) {
                     dataSets.get(0).clear();
                     List<Entry> apentry = new ArrayList<>();
                     for (int i = 0; i < MAX_VALUES; i++) {
-                        float xvalue = (i * step);
-                        float yvalue = (float) (biendo * Math.sin(2 * Math.PI * tanso * xvalue + phase) + zerovalue);
+                        float xvalue = (float) (i * sampleTime);
+                        float yvalue = (float) mangSongam.get(i);
                         apentry.add(new Entry(xvalue, yvalue));
                     }
                     addEntry(dataSets.get(0), apentry);
                 }
-                else {
-                    List<Entry> apentry = new ArrayList<>();
-                    float xValue = (float) dataSets.get(0).getEntryCount() * 0.1f;
-                    float yValue = (float) decibel;
-                    apentry.add(new Entry(xValue, yValue));
-                    addEntry(dataSets.get(0), apentry);
-                }
-                txtTanso.setText("Tần số: " + df2.format(tanso) + "Hz");
-                txtBiendo.setText("Biên độ: " + df2.format(biendo) + "V");
-                txtDoto.setText("Độ to: " + decibel + "dB");
-//                for (float yvalue : value
-//                ) {
-//                    mangSongam.add(yvalue);
-//                }
-//                if (mangSongam.size() >= MAX_VALUES) {
-//                    double[] sinwave = fft(mangSongam, MainActivity.tansoLayMau / 1000.0, MAX_VALUES);
-//                    if (isTansoSongam) {
-//                        dataSets.get(0).clear();
-//                        List<Entry> apentry = new ArrayList<>();
-//                        for (int i = 0; i < MAX_VALUES; i++) {
-//                            float xvalue = (float) (i * MainActivity.tansoLayMau / 1000.0);
-//                            float yvalue = (float) mangSongam.get(i);
-//                            apentry.add(new Entry(xvalue, yvalue));
-//                        }
-//                        addEntry(dataSets.get(0), apentry);
-//                    } else {
-//                        float xvalue = (float) dataSets.get(0).getEntryCount() * 0.1f;
-//                        float yvalue = (float) sinwave[2];
-//                        List<Entry> entry = new ArrayList<>();
-//                        entry.add(new Entry(xvalue, yvalue));
-//                        addEntry(dataSets.get(0), entry);
-//                    }
-//
-//
-//                    mangSongam.clear();
-//                }
+                mangSongam.clear();
             }
+//            }
 
         }
     }
 
 
-    private static double findPhase(double[] t, double[] y, double A, double f) {
-        double phi = 0;
-        double minError = Double.MAX_VALUE;
+    private void fft(List<Float> value, double sampleTime, int length) {
+        int paddedLength = 8192; // zero-padding đến 2048 điểm
 
-        for (double testPhi = 0; testPhi < 2 * Math.PI; testPhi += 0.01) {
-            double error = 0;
-            for (int i = 0; i < t.length; i++) {
-                double y_estimated = A * Math.sin(2 * Math.PI * f * t[i] + testPhi);
-                error += Math.pow(y[i] - y_estimated, 2);
-            }
-            if (error < minError) {
-                minError = error;
-                phi = testPhi;
-            }
-        }
-
-        return phi;
-    }
-
-    private double[] fft(List<Float> value, double sampleTime, int length) {
-        double[] sinewave = new double[3];
-        DoubleFFT_1D fft = new DoubleFFT_1D(length);
-        double[] fftData = new double[2 * length];  // FFT sử dụng mảng phức
+        DoubleFFT_1D fft = new DoubleFFT_1D(paddedLength);
+        double[] fftData = new double[2 * paddedLength];  // FFT sử dụng mảng phức
         double[] y = new double[length];
         double[] t = new double[length];
-        double mean = 0.0;
-        for (int i = 0; i < length; i++) {
-            mean += value.get(i);
+
+        double sum = 0.0;
+        for (float x : value) {
+            sum += x * x;
         }
-        mean /= length;
+        double rms = Math.sqrt(sum / (length));
+
 
         // Trừ giá trị trung bình để loại bỏ thành phần DC
         for (int i = 0; i < length; i++) {
-            y[i] = (double) value.get(i) - mean;
+            y[i] = (double) value.get(i);
             t[i] = i * sampleTime;
         }
-//        for (int i = 0; i < length; i++) {
-//            y[i] = (double) value.get(i);
-//            t[i] = i * sampleTime;
-//        }
         System.arraycopy(y, 0, fftData, 0, length);
         fft.realForwardFull(fftData);
-        double[] freqs = new double[length / 2];
-        double[] magnitudes = new double[length / 2];
-        for (int i = 0; i < length / 2; i++) {
+        double[] freqs = new double[paddedLength / 2];
+        double[] magnitudes = new double[paddedLength / 2];
+        for (int i = 0; i < paddedLength / 2; i++) {
             double real = fftData[2 * i];
             double imag = fftData[2 * i + 1];
-            magnitudes[i] = Math.sqrt(real * real + imag * imag) * 2 / length;
-            freqs[i] = i / (length * sampleTime);
+            magnitudes[i] = Math.sqrt(real * real + imag * imag) * 2 / paddedLength;
+            freqs[i] = i / (paddedLength * sampleTime);
         }
 
         // Xác định tần số và biên độ ước tính
@@ -434,27 +388,21 @@ public class FragmentSongam extends Fragment {
             }
         }
         double f_estimated = freqs[maxIndex];
-        double A_estimated = magnitudes[maxIndex];
-        double A_min = 0.0;
-        double A_max = 1.95;
-        double min_dB = 40.0;
-        double max_dB = 100.0;
-        double decibel = (int) convertAmplitudeToDecibel(A_estimated, A_min, A_max, min_dB, max_dB);
+        double decibel = 30;
+        if (rms != 0.0) {
+            decibel = 20.0 * Math.log10(rms / 8.3886080) + 115;
+        } else {
+            decibel = 40;
+        }
         // Tìm pha bằng cách khớp tín hiệu
 //        double phi_estimated = findPhase(t, y, A_estimated, f_estimated);
 //        Log.d("songam", "Pha ước tính: " + phi_estimated);
 //        Log.d("songam", "Tần số ước tính: " + f_estimated);
 //        Log.d("songam", "Biên độ ước tính: " + A_estimated);
         txtTanso.setText("Tần số: " + df2.format(f_estimated) + "Hz");
-        txtBiendo.setText("Biên độ: " + df2.format(A_estimated) + "V");
+        txtBiendo.setText("Biên độ: " + df2.format(rms) + "V");
         txtDoto.setText("Độ to: " + (int) decibel + "dB");
-        sinewave[0] = A_estimated;
-        sinewave[1] = f_estimated;
-        sinewave[2] = decibel;
-        return sinewave;
+
     }
 
-    public double convertAmplitudeToDecibel(double amplitude, double minAmplitude, double maxAmplitude, double minDecibel, double maxDecibel) {
-        return minDecibel + (amplitude - minAmplitude) / (maxAmplitude - minAmplitude) * (maxDecibel - minDecibel);
-    }
 }

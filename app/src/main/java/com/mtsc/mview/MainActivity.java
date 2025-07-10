@@ -49,6 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleIndicateCallback;
 import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleWriteCallback;
 import com.clj.fastble.data.BleDevice;
@@ -306,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
         btnStart = (Button) findViewById(R.id.buttonBatdau_mainActivity);
         btnChontanso = (Button) findViewById(R.id.buttonChontanso_mainActivity);
-        btnHieuchinh= (Button) findViewById(R.id.buttonHieuchinh_mainActivity);
+        btnHieuchinh = (Button) findViewById(R.id.buttonHieuchinh_mainActivity);
         tbUSB = new ArrayList<>();
         tbScansUsb = new ArrayList<>();
         soCambienUSB = new ArrayList<>();
@@ -1163,7 +1164,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
             System.arraycopy(tempArray, 0, byteArray, 1, tempArray.length);
         }
-        btnStart.setText("Dừng Lại");
         solanchay++;
         Run currentRun = new Run((int) solanchay, 1000 / tansoLayMau);
         if (currentFragment instanceof FragmentMachDienXC || currentFragment instanceof FragmentSongam || currentFragment instanceof FragmentNhapbangtay) {
@@ -1177,14 +1177,14 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
         EventBus.getDefault().post(new DataEvent(dulieuCB));
 
-
+        btnStart.setText("Dừng Lại");
         int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
         btnStart.setBackgroundColor(colorDo);
         btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
 
         for (ConnectedDevice connectedDevice : tbKetnois) {
             final BleDevice bleDevice = connectedDevice.getDevice();
-             SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
+            SensorData sensorData = currentRun.getSensorDataByName(bleDevice.getName());
 
             if (sensorData == null) {
                 sensorData = new SensorData(connectedDevice.getDevice().getName());
@@ -1192,110 +1192,151 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             }
             final SensorData finalSensorData = sensorData; // Để dùng trong callback
 
-            BleManager.getInstance().write(connectedDevice.getDevice(), connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
+
+            BleManager.getInstance().notify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), new BleNotifyCallback() {
                 @Override
-                public void onWriteSuccess(int current, int total, byte[] justWrite) {
-
-
-                    BleManager.getInstance().notify(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), new BleNotifyCallback() {
+                public void onNotifySuccess() {
+                    BleManager.getInstance().write(bleDevice, connectedDevice.getServiceUuid(), connectedDevice.getReadUuid(), byteArray, new BleWriteCallback() {
                         @Override
-                        public void onNotifySuccess() {
+                        public void onWriteSuccess(int current, int total, byte[] justWrite) {
+
 
                         }
 
-                        @Override
-                        public void onNotifyFailure(BleException exception) {
-
-                        }
 
                         @Override
-                        public void onCharacteristicChanged(byte[] data) {
-                            int vitri = bleDevice.getName().indexOf('-');
-
-                            if (data != null) {
-                                if (data[0] == 0x02 && data[data.length - 1] == 0x03) {
-//                                                    for(int i=0;i<data.length;i++){
-//                                                        Log.d("dulieu",String.valueOf(data[i]));
-//                                                    }
-                                    if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
-                                        List<Float> mangAp = new ArrayList<>();
-                                        List<Float> mangDong = new ArrayList<>();
-                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                            float dienap = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                            mangAp.add(dienap);
-                                            float dongdien = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                            mangDong.add(dongdien);
-                                        }
-                                        DulieuCB dulieuAp = new DulieuCB(bleDevice.getName(), Uuid.Voltage, mangAp);
-                                        DulieuCB dulieuDong = new DulieuCB(bleDevice.getName(), Uuid.Current, mangDong);
-                                        EventBus.getDefault().post(new DataEvent(dulieuAp));
-                                        EventBus.getDefault().post(new DataEvent(dulieuDong));
-                                    } else if (bleDevice.getName().substring(0, vitri).equals("P&T") && data.length >= 10) {
-                                        List<Float> mangApsuat = new ArrayList<>();
-                                        List<Float> mangNhietdo = new ArrayList<>();
-                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                            float apsuat = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                            mangApsuat.add(apsuat);
-                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                            mangNhietdo.add(nhietdo);
-                                        }
-                                        DulieuCB dulieuApsuat = new DulieuCB(bleDevice.getName(), Uuid.Pressure, mangApsuat);
-                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
-                                        EventBus.getDefault().post(new DataEvent(dulieuApsuat));
-                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
-                                    } else if (bleDevice.getName().substring(0, vitri).equals("H&T") && data.length >= 10) {
-                                        List<Float> mangDoam = new ArrayList<>();
-                                        List<Float> mangNhietdo = new ArrayList<>();
-                                        for (int i = 0; i < (data.length - 2) / 8; i++) {
-                                            float doam = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                            mangDoam.add(doam);
-                                            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                                                        Log.d("dulieu",String.valueOf(dienap));
-                                            mangNhietdo.add(nhietdo);
-                                        }
-                                        DulieuCB dulieuDoam = new DulieuCB(bleDevice.getName(), Uuid.Humid, mangDoam);
-                                        DulieuCB dulieuNhietdo = new DulieuCB(bleDevice.getName(), Uuid.Temp, mangNhietdo);
-                                        EventBus.getDefault().post(new DataEvent(dulieuDoam));
-                                        EventBus.getDefault().post(new DataEvent(dulieuNhietdo));
-                                    } else {
-                                        int vtrithietbi = 0;
-                                        for (int i = 0; i < sodoCambienList.size(); i++) {
-                                            if (sodoCambienList.get(i).getBleDevice() == bleDevice) {
-                                                vtrithietbi = i;
-                                                break;
-                                            }
-                                        }
-                                        List<Float> mangValue = new ArrayList<>();
-
-                                        for (int i = 0; i < (data.length - 2) / 4; i++) {
-                                            float value = ByteBuffer.wrap(data, i * 4 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                                            mangValue.add(value);
-                                            if (finalSensorData != null) {
-                                                finalSensorData.addValue(value); // Example value
-                                            }                                        }
-                                        DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
-                                        EventBus.getDefault().post(new DataEvent(dulieuCB1));
-                                    }
-
-
-                                }
-                            }
+                        public void onWriteFailure(BleException exception) {
 
                         }
                     });
-//                                }
                 }
 
                 @Override
-                public void onWriteFailure(BleException exception) {
+                public void onNotifyFailure(BleException exception) {
 
+                }
+
+                @Override
+                public void onCharacteristicChanged(byte[] data) {
+                    int vitri = bleDevice.getName().indexOf('-');
+
+                    if (data != null) {
+                        if (data[0] == 0x02 && data[data.length - 1] == 0x03) {
+//                            for (int i = 0; i < data.length; i++) {
+//                                Log.d("dulieu", String.valueOf(data[i]));
+//                            }
+                            if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
+                                xuLyApVaDong(data,bleDevice);
+
+                            } else if (bleDevice.getName().substring(0, vitri).equals("P&T") && data.length >= 10) {
+                                xuLyApSuatVaNhietDo(data, bleDevice);
+
+                            } else if (bleDevice.getName().substring(0, vitri).equals("H&T") && data.length >= 10) {
+                                xuLyDoAmVaNhietDo(data,bleDevice);
+                            }else if (bleDevice.getName().substring(0,vitri).equals("SoundF")){
+                                xuLyAmthanh(data, bleDevice);
+                            }
+                            else {
+                                int vtrithietbi = 0;
+                                for (int i = 0; i < sodoCambienList.size(); i++) {
+                                    if (sodoCambienList.get(i).getBleDevice() == bleDevice) {
+                                        vtrithietbi = i;
+                                        break;
+                                    }
+                                }
+                                List<Float> mangValue = new ArrayList<>();
+
+                                for (int i = 0; i < (data.length - 2) / 4; i++) {
+                                    float value = ByteBuffer.wrap(data, i * 4 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                    mangValue.add(value);
+                                    if (finalSensorData != null) {
+                                        finalSensorData.addValue(value); // Example value
+                                    }
+                                }
+                                DulieuCB dulieuCB1 = new DulieuCB(bleDevice.getName(), sodoCambienList.get(vtrithietbi).getTencambien(), mangValue);
+
+                                EventBus.getDefault().post(new DataEvent(dulieuCB1));
+                            }
+                        }
+                    }
                 }
             });
         }
     }
+    private void xuLyApVaDong(byte[] data, BleDevice bleDevice) {
+        List<Float> mangAp = new ArrayList<>();
+        List<Float> mangDong = new ArrayList<>();
 
+        for (int i = 0; i < (data.length - 2) / 8; i++) {
+            float dienap = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            float dongdien = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            mangAp.add(dienap);
+            mangDong.add(dongdien);
+        }
+
+        postDataEvent(bleDevice, Uuid.Voltage, mangAp);
+        postDataEvent(bleDevice, Uuid.Current, mangDong);
+    }
+
+    private void xuLyApSuatVaNhietDo(byte[] data, BleDevice bleDevice) {
+        List<Float> mangApsuat = new ArrayList<>();
+        List<Float> mangNhietdo = new ArrayList<>();
+
+        for (int i = 0; i < (data.length - 2) / 8; i++) {
+            float apsuat = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            mangApsuat.add(apsuat);
+            mangNhietdo.add(nhietdo);
+        }
+
+        postDataEvent(bleDevice, Uuid.Pressure, mangApsuat);
+        postDataEvent(bleDevice, Uuid.Temp, mangNhietdo);
+    }
+
+    private void xuLyDoAmVaNhietDo(byte[] data, BleDevice bleDevice) {
+        List<Float> mangDoam = new ArrayList<>();
+        List<Float> mangNhietdo = new ArrayList<>();
+
+        for (int i = 0; i < (data.length - 2) / 8; i++) {
+            float doam = ByteBuffer.wrap(data, i * 8 + 1, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            float nhietdo = ByteBuffer.wrap(data, i * 8 + 5, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            mangDoam.add(doam);
+            mangNhietdo.add(nhietdo);
+        }
+
+        postDataEvent(bleDevice, Uuid.Humid, mangDoam);
+        postDataEvent(bleDevice, Uuid.Temp, mangNhietdo);
+    }
+    private void xuLyAmthanh(byte[] data, BleDevice bleDevice) {
+        List<Float> mangAmthanh = new ArrayList<>();
+        for (int i = 0; i < (data.length - 3) / 4; i++) {
+            float amthanh = ByteBuffer.wrap(data, i * 4 + 2, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+            mangAmthanh.add(amthanh);
+        }
+        int packIndex = data[1];
+        if(packIndex == 20){
+            postDataEvent(bleDevice, Uuid.Frequency, mangAmthanh);
+        }else{
+            postDataEvent(bleDevice, String.valueOf(data[1]), mangAmthanh);
+
+        }
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("Giá trị mangValue " + String.valueOf(data[1]) + ": [");
+//        for (int i = 0; i < mangAmthanh.size(); i++) {
+//            sb.append(String.format("%.3f", mangAmthanh.get(i)));
+//            if (i != mangAmthanh.size() - 1) sb.append(", ");
+//            if ((i + 1) % 10 == 0)
+//                sb.append("\n");  // Xuống dòng sau mỗi 10 giá trị
+//        }
+//        sb.append("]");
+//        Log.d("dulieu", sb.toString());
+//        postDataEvent(bleDevice, String.valueOf(data[1]), mangAmthanh);
+    }
+
+    private void postDataEvent(BleDevice bleDevice, String tencambien, List<Float> values) {
+        DulieuCB dulieu = new DulieuCB(bleDevice.getName(), tencambien, values);
+        EventBus.getDefault().post(new DataEvent(dulieu));
+    }
     private void handleStopBLE() {
         // All logic for stopping BLE
         // (move code from btnStart's BLE stop block here)
