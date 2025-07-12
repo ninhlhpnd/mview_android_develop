@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">M-View</string>
+    <string name="please_open_blue">Please open blue</string>
+    <string name="notifyTitle">Notify title</string>
+    <string name="gpsNotifyMsg">GPS</string>
+    <string name="cancel">Cancle</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+
+    <string name="setting">Setting</string>
+    <string name="layout">Layout</string>
+    <string name="history">History</string>
+
+    <string name="read_auto">Auto Read</string>
+    <string name="read_manual">Manual Read</string>
+    <string name="ac_circle">AC Circuit</string>
+    <string name="sound_wave">Sound Wave</string>
+
+    <string name="frequency">Freq:</string>
+    <string name="start_button">Start</string>
+    <string name="stop_button">Stop</string>
+    <string name="tool">Tool</string>
+
+    <string name="kieu_hien_thi">Display Mode</string>
+    <string name="do_thi">Graph</string>
+    <string name="so">Number</string>
+    <string name="bang_so_lieu">Data Table</string>
+    <string name="dong_ho">Gauge</string> <!-- Hoặc "Clock" nếu đúng là đồng hồ thời gian -->
+
+    <string name="chon_so_do">Select Measurement</string>
+    <string name="chua_co_so_do">No sensor</string>
+
+    <string name="phan_tich">Analysis</string>
+    <string name="toa_do">Coordinates</string>
+    <string name="chenh_lech">Difference</string>
+    <string name="do_doc">Slope</string>
+    <string name="trung_binh">Average</string>
+    <string name="rms">RMS</string> <!-- Không dịch, đúng chuẩn kỹ thuật -->
+    <string name="ham_bac2">Quadratic Function</string>
+
+    <string name="giao_dien_ket_noi_cam_bien">Sensor Connection Interface</string>
+    <string name="cac_thiet_bi_duoc_ket_noi">Connected Devices</string>
+    <string name="chon_mot_thiet_bi_khong_day_de_ket_noi">Select a wireless device to connect</string>
+
+    <string name="ket_noi_thanh_cong">Successful connection</string>
+    <string name="ket_noi_that_bai">Fail connection</string>
+    <string name="quet">Scan</string>
+
+    <string name="chua_co_lan_chay_nao">No run</string>
+    <string name="run_history">Run</string>
+    <string name="luu_file">Save file</string>
+    <string name="nhap_ten_file">Enter file name</string>
+    <string name="ten_file_khong_hop_le">Invalid file name</string>
+    <string name="luu">Save</string>
+    <string name="da_luu_file_tai">File saved at</string>
+    <string name="loi_luu_file">Error saving file</string>
+    <string name="chon_file_de_mo">Select a file to open</string>
+    <string name="khong_thay_file_nao">No files found</string>
+
+    <string name="cam_bien">Sensor</string>
+    <string name="thoi_gian">Time (s)</string>
+
+    <string name="nhiet_do">Temperature</string>
+    <string name="do_am">Humidity</string>
+    <string name="ap_suat">Pressure</string>
+    <string name="nong_do_oxy">Oxygen Concentration</string>
+    <string name="nong_do_co2">CO₂ Concentration</string>
+    <string name="am_thanh">Sound</string>
+    <string name="nong_do_ph">pH Level</string>
+    <string name="nong_do_muoi">Salinity</string>
+    <string name="nong_do_oxy_trong_nuoc">Dissolved Oxygen</string>
+    <string name="dien_ap">Voltage</string>
+    <string name="dong_dien">Current</string>
+    <string name="luc">Force</string>
+    <string name="vi_tri">Position</string>
+    <string name="do_dan">Conductivity</string>
+    <string name="do_sang">Brightness</string>
+
+    <string name="xac_dinh_do_doc">Best fit(y=mx+b)</string>
+
+    <string name="bien_do">Amplitude</string>
+    <string name="tan_so">Frequency</string>
+    <string name="do_to">Sound level</string>
+
+    <string name="hieu_chinh_cam_bien">Sensor Calibration</string>
+    <string name="chon_cam_bien">Choose sensor</string>
+    <string name="hieu_chinh_1_diem">Calib 1 point</string>
+    <string name="hieu_chinh_2_diem">Calib 2 point</string>
+    <string name="nhap_vao_so">Enter value</string>
+    <string name="hieu_chinh_tai_diem">Calibrate at</string>
+    <string name="hieu_chinh_diem_1">Calibrate point 1</string>
+    <string name="hieu_chinh_diem_2">Calibrate point 2</string>
+    <string name="chon_tat_ca">Select all</string>
+</resources>

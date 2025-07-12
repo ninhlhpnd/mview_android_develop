@@ -297,22 +297,22 @@ public class FragmentNhapbangtay extends Fragment {
                 return true;
             }
         });
-        btnTare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (MainActivity.tansoLayMau >= 60) {
-                    offsetX = offsetX - valueSlowX;
-                    offsetY = offsetY - valueSlowY;
-                }
-            }
-        });
+//        btnTare.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (MainActivity.tansoLayMau >= 60) {
+//                    offsetX = offsetX - valueSlowX;
+//                    offsetY = offsetY - valueSlowY;
+//                }
+//            }
+//        });
     }
 
     private void anhXa(View view) {
         btnDulieux = (Button) view.findViewById(R.id.buttonDulieux_fragmentNhapbangtay);
         btnDulieuy = (Button) view.findViewById(R.id.buttonDulieuy_fragmentNhapbangtay);
         btnPhantich = (Button) view.findViewById(R.id.buttonPhantich_fragmentNhapbangtay);
-        btnTare = (Button) view.findViewById(R.id.buttonTare_fragmentNhapbangtay);
+//        btnTare = (Button) view.findViewById(R.id.buttonTare_fragmentNhapbangtay);
         lvDulieu = (ListView) view.findViewById(R.id.listview_fragmentNhapbangtay);
         lineChart = (LineChart) view.findViewById(R.id.linechart_fragmentNhapbangtay);
         imgLaydulieu = (ImageView) view.findViewById(R.id.imageview_fragmentNhapbangtay);

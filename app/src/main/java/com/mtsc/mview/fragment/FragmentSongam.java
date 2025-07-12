@@ -93,43 +93,43 @@ public class FragmentSongam extends Fragment {
         anhXa(view);
         khoitaodothi();
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                String selectedItem = adapterView.getItemAtPosition(position).toString();
-                if (selectedItem.equals("Tần số sóng âm")) {
-                    isTansoSongam = true;
-                    dataSets.get(0).clear();
-                    YAxis leftAxis = lineChart.getAxisLeft();
-                    leftAxis.setAxisMaximum(maxYValue);
-                    leftAxis.setAxisMinimum(minYValue);
-                    XAxis x1 = lineChart.getXAxis();
-                    x1.setAxisMaximum(sampleTime * MAX_VALUES);
+//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+//                String selectedItem = adapterView.getItemAtPosition(position).toString();
+//                if (selectedItem.equals("Tần số sóng âm")) {
+//                    isTansoSongam = true;
+//                    dataSets.get(0).clear();
+//                    YAxis leftAxis = lineChart.getAxisLeft();
+//                    leftAxis.setAxisMaximum(maxYValue);
+//                    leftAxis.setAxisMinimum(minYValue);
+//                    XAxis x1 = lineChart.getXAxis();
+//                    x1.setAxisMaximum(sampleTime * MAX_VALUES);
 //                    x1.setSpaceMin(0.001f);
-                } else if (selectedItem.equals("Tốc độ truyền âm")) {
-                    isTansoSongam = false;
-                    dataSets.get(0).clear();
-                    YAxis leftAxis = lineChart.getAxisLeft();
-                    leftAxis.setAxisMaximum(100f);
-                    leftAxis.setAxisMinimum(30f);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
+//                } else if (selectedItem.equals("Tốc độ truyền âm")) {
+//                    isTansoSongam = false;
+//                    dataSets.get(0).clear();
+//                    YAxis leftAxis = lineChart.getAxisLeft();
+//                    leftAxis.setAxisMaximum(100f);
+//                    leftAxis.setAxisMinimum(30f);
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float maxRange = sampleTime * MAX_VALUES;
                 float[] range = {maxRange, maxRange * 3 / 4, maxRange / 2, maxRange / 4, maxRange / 5, maxRange / 10};
-                if (isTansoSongam) {
-                    lineChart.getXAxis().setAxisMaximum(range[progress - 1]);
-                    lineChart.notifyDataSetChanged();
-                    lineChart.invalidate();
-                }
+
+                lineChart.getXAxis().setAxisMaximum(range[progress - 1]);
+                lineChart.notifyDataSetChanged();
+                lineChart.invalidate();
+
             }
 
             @Override
@@ -149,7 +149,7 @@ public class FragmentSongam extends Fragment {
         txtBiendo = (TextView) view.findViewById(R.id.textviewBiendo_fragmentsongam);
         txtTanso = (TextView) view.findViewById(R.id.textviewTanso_fragmentsongam);
         txtDoto = (TextView) view.findViewById(R.id.textviewDoto_fragmentsongam);
-        spinner = view.findViewById(R.id.spinner_fragmentsongam);
+//        spinner = view.findViewById(R.id.spinner_fragmentsongam);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.songamLession, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
@@ -254,9 +254,6 @@ public class FragmentSongam extends Fragment {
 //            float minY = Math.min(leftAxis.getAxisMinimum(), getMinYValue(entries) - 1f);
 //            leftAxis.setAxisMinimum(minY);
 //            leftAxis.setAxisMaximum(maxY);
-            if (!isTansoSongam) {
-                lineChart.getXAxis().setAxisMaximum(xValueMax + 1f);
-            }
 //            lineChart.getAxisRight().setAxisMaximum(maxY);
 //            lineChart.getAxisRight().setAxisMinimum(minY);
             lineChart.notifyDataSetChanged();
@@ -305,11 +302,6 @@ public class FragmentSongam extends Fragment {
             mangSongam.clear();
             List<Float> value = dulieuCB.getGiatricambien();
             dataSets.get(0).clear();
-            if (isTansoSongam) {
-//                lineChart.getXAxis().setAxisMaximum(value.get(1) / 1000.0f * MAX_VALUES);
-            } else {
-                lineChart.getXAxis().setAxisMaximum(10f);
-            }
 
         } else {
 
@@ -331,16 +323,16 @@ public class FragmentSongam extends Fragment {
             expectedPackIndex++;
             if (mangSongam.size() == MAX_VALUES) {
                 fft(mangSongam, sampleTime, mangSongam.size());
-                if (isTansoSongam) {
-                    dataSets.get(0).clear();
-                    List<Entry> apentry = new ArrayList<>();
-                    for (int i = 0; i < MAX_VALUES; i++) {
-                        float xvalue = (float) (i * sampleTime);
-                        float yvalue = (float) mangSongam.get(i);
-                        apentry.add(new Entry(xvalue, yvalue));
-                    }
-                    addEntry(dataSets.get(0), apentry);
+
+                dataSets.get(0).clear();
+                List<Entry> apentry = new ArrayList<>();
+                for (int i = 0; i < MAX_VALUES; i++) {
+                    float xvalue = (float) (i * sampleTime);
+                    float yvalue = (float) mangSongam.get(i);
+                    apentry.add(new Entry(xvalue, yvalue));
                 }
+                addEntry(dataSets.get(0), apentry);
+
                 mangSongam.clear();
             }
 //            }

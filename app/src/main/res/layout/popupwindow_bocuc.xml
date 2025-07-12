@@ -6,7 +6,7 @@
     android:layout_gravity="center_vertical"
     android:orientation="vertical" >
     <TextView
-        android:text="Bố Cục"
+        android:text="@string/layout"
         android:textAllCaps="false"
         android:textSize="15sp"
         android:gravity="center"

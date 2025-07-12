@@ -8,7 +8,7 @@
 
     <!-- Tiêu đề -->
     <TextView
-        android:text="Lịch Sử"
+        android:text="@string/history"
         android:textColor="@color/white"
         android:background="@drawable/textview_custom"
         android:gravity="center"
@@ -53,7 +53,7 @@
         <!-- Text hiển thị khi không có dữ liệu -->
         <TextView
             android:id="@+id/textviewEmpty_lichsu"
-            android:text="Chưa có lần chạy nào"
+            android:text="@string/chua_co_lan_chay_nao"
             android:textColor="@color/black"
             android:textSize="15sp"
             android:gravity="center"

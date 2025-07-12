@@ -1,26 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">M-View</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="please_open_blue">Please open blue</string>
-    <string name="notifyTitle">Notify title</string>
+    <string name="please_open_blue">Mở BLE</string>
+    <string name="notifyTitle">Tiêu đề</string>
     <string name="gpsNotifyMsg">GPS</string>
     <string name="cancel">Hủy bỏ</string>
-    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="title_activity_login">Trang đăng nhập</string>
     <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-    <string-array name="songamLession">
-        <item>Tần số sóng âm</item>
-        <item>Tốc độ truyền âm</item>
-    </string-array>
-    <string name="setting">Cài Đặt</string>
-    <string name="layout">Bố Cục</string>
-    <string name="history">Lịch Sử</string>
+    <string name="prompt_password">Mật khẩu</string>
+    <string name="action_sign_in">Đăng ký</string>
+    <string name="action_sign_in_short">Đăng nhập</string>
+    <string name="welcome">Chao mừng</string>
+
+    <string name="invalid_username">Tên đăng nhập không đúng</string>
+    <string name="invalid_password">Mật khẩu phải quá 5 ký tự</string>
+    <string name="login_failed">"Đăng nhập thất bại"</string>
+
+    <string name="setting">Cài đặt</string>
+    <string name="layout">Bố cục</string>
+    <string name="history">Lịch sử</string>
 
     <string name="read_auto">Đọc dữ liệu tự động</string>
     <string name="read_manual">Đọc dữ liệu bằng tay</string>
@@ -93,7 +92,7 @@
     <string name="tan_so">Tần số</string>
     <string name="do_to">Độ to</string>
 
-    <string name="hieu_chinh_cam_bien">HIỆU CHỈNH CẢM BIẾN</string>
+    <string name="hieu_chinh_cam_bien">Hiệu chỉnh cảm biến</string>
     <string name="chon_cam_bien">Chọn Cảm Biến</string>
     <string name="hieu_chinh_1_diem">Hiệu chỉnh 1 điểm</string>
     <string name="hieu_chinh_2_diem">Hiệu chỉnh 2 điểm</string>

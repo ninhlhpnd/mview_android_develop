@@ -19,6 +19,9 @@ public class FragmentKieuDocDulieu extends Fragment {
     private View layout;
     Button btnAuto, btnManual, btnMachXC, btnSongam;
     private FragmentManager fragmentManager;
+    public FragmentKieuDocDulieu() {
+        // Required empty public constructor
+    }
     public FragmentKieuDocDulieu(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }

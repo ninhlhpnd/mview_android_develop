@@ -198,7 +198,7 @@ public class BluetoothFragment extends DialogFragment {
             public void onConnectFail(BleDevice bleDevice, BleException exception) {
                 progressDialog.dismiss();
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "Connection Fail", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.ket_noi_that_bai), Toast.LENGTH_SHORT).show();
                     Log.e("ble", "Connection Fail");
                 }
             }

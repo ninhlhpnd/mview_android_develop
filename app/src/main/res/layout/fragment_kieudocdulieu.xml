@@ -14,7 +14,7 @@
         android:layout_height="match_parent">
         <Button
             android:id="@+id/buttonTudong_fragmentkieudoc"
-            android:text="Đọc dữ liệu tự động"
+            android:text="@string/read_auto"
             android:textColor="@color/black"
             android:autoSizeMaxTextSize="15sp"
             android:autoSizeMinTextSize="10sp"
@@ -38,9 +38,9 @@
         android:layout_height="match_parent">
         <Button
             android:id="@+id/buttonBangtay_fragmentkieudoc"
-            android:text="Đọc dữ liệu bằng tay"
+            android:text="@string/read_manual"
             android:textColor="@color/black"
-            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeMaxTextSize="15sp"
             android:autoSizeMinTextSize="10sp"
             android:autoSizeStepGranularity="1sp"
             android:autoSizeTextType="uniform"
@@ -62,9 +62,9 @@
         android:layout_height="match_parent">
         <Button
             android:id="@+id/buttonMachxoaychieu_fragmentkieudoc"
-            android:text="Đoạn mạch xoay chiều"
+            android:text="@string/ac_circle"
             android:textColor="@color/black"
-            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeMaxTextSize="15sp"
             android:autoSizeMinTextSize="10sp"
             android:autoSizeStepGranularity="1sp"
             android:autoSizeTextType="uniform"
@@ -86,7 +86,7 @@
         android:layout_height="match_parent">
         <Button
             android:id="@+id/buttonSongam_fragmentkieudoc"
-            android:text="Sóng âm"
+            android:text="@string/sound_wave"
             android:textColor="@color/black"
             android:autoSizeMaxTextSize="15sp"
             android:autoSizeMinTextSize="10sp"

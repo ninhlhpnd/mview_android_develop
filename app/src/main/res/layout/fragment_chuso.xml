@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
     <TextView
         android:id="@+id/textviewTenCambien_fragmentChuso"
-        android:text="Cảm Biến"
+        android:text="@string/cam_bien"
         android:textColor="@color/xanhdam"
         android:textSize="18sp"
         android:gravity="center"

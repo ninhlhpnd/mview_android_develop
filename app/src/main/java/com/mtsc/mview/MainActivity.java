@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,17 +16,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.ContactsContract;
-import android.provider.DocumentsContract;
+
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -119,6 +118,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Observer;
 import java.util.Timer;
@@ -156,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public static List<ListItemUSB> tbUSB;
     private SerialInputOutputManager usbIoManager;
 
-    //    public static List<KalmanFilterWrapper> kalmanFilterWrapperList;
     private static String[] PERMISSIONS_STORAGE = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_PRIVILEGED};
     private static String[] PERMISSIONS_LOCATION = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_PRIVILEGED};
     private static final int REQUEST_WRITE_PERMISSION = 100;
@@ -170,6 +169,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     private DeviceDataBuffer dataBufferBle;
     private static final int BUFFER_SIZE = 10000; // Kích thước bộ đệm
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        SharedPreferences prefs = newBase.getSharedPreferences("settings", MODE_PRIVATE);
+        String lang = prefs.getString("app_lang", "vi");
+        Context context = updateLocale(newBase, lang);
+        super.attachBaseContext(context);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); // Ẩn thanh trạng thái
         setContentView(R.layout.activity_main);
 //        hideNavigationBar();
-//        kalmanFilterWrapperList=new ArrayList<>();
         checkPermissions();
         anhXa();
         initBLE();
@@ -193,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                         handleStartUSB();
                     }
                 } else {
-                    btnStart.setText("Bắt Đầu ");
+                    btnStart.setText(getString(R.string.start_button) + " ");
                     int colorXanh = ContextCompat.getColor(getBaseContext(), R.color.xanhduongnhat);
                     btnStart.setBackgroundColor(colorXanh);
                     btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_start, 0, 0, 0);
@@ -257,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                                 tansoLayMau = 0.1;
                                 break;
                         }
-                        btnChontanso.setText("Tần Số: " + (int) (1000 / tansoLayMau) + "Hz");
+                        btnChontanso.setText(getString(R.string.frequency) + " " + (int) (1000 / tansoLayMau) + "Hz");
                         timeBleHandler = tansoLayMau > 200 ? (int) tansoLayMau : 200;
                         return false;
                     }
@@ -283,12 +288,15 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         thanhcongcuClasses = new ArrayList<>();
         tbKetnois = new ArrayList<>();
         sodoCambienList = new ArrayList<>();
+
+        Uuid.initSensors(getBaseContext());
+
         thanhcongcuClasses.add(new thanhcongcuClass(1, R.drawable.bluetooth, "Bluetooth"));
         thanhcongcuClasses.add(new thanhcongcuClass(2, R.drawable.icon_usb, "USB"));
         thanhcongcuClasses.add(new thanhcongcuClass(3, R.drawable.home, "Home"));
-//        thanhcongcuClasses.add(new thanhcongcuClass(4, R.drawable.tool, "Công cụ"));
-        thanhcongcuClasses.add(new thanhcongcuClass(5, R.drawable.bocuc, "Bố cục"));
-        thanhcongcuClasses.add(new thanhcongcuClass(6, R.drawable.file_icon, "Lịch sử"));
+        thanhcongcuClasses.add(new thanhcongcuClass(4, R.drawable.tool, getString(R.string.setting)));
+        thanhcongcuClasses.add(new thanhcongcuClass(5, R.drawable.bocuc, getString(R.string.layout)));
+        thanhcongcuClasses.add(new thanhcongcuClass(6, R.drawable.file_icon, getString(R.string.history)));
 
         thanhcongcuAdapter = new thanhcongcuAdapter(getApplicationContext(), thanhcongcuClasses, this);
         recyclerViewThanhcongcu.setHasFixedSize(true);
@@ -307,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
         btnStart = (Button) findViewById(R.id.buttonBatdau_mainActivity);
         btnChontanso = (Button) findViewById(R.id.buttonChontanso_mainActivity);
+        btnChontanso.setText(getString(R.string.frequency) + " " + (int) (1000 / tansoLayMau) + "Hz");
         btnHieuchinh = (Button) findViewById(R.id.buttonHieuchinh_mainActivity);
         tbUSB = new ArrayList<>();
         tbScansUsb = new ArrayList<>();
@@ -384,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                 break;
             }
             case 4: {
-//                hieuChinhCamBien();
+                showLanguageDialog();
                 break;
             }
             case 5: {
@@ -420,6 +429,66 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
     private void quayVeHome() {
         fragmentManager.beginTransaction().replace(R.id.layoutFragment_main, new FragmentKieuDocDulieu(fragmentManager)).commit();
+    }
+
+    private void showLanguageDialog() {
+        final String[] languages = {"English", "Tiếng Việt"};
+        final String[] languageCodes = {"en", "vi"};
+        int checkedItem = 0; // Default selection
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Chọn ngôn ngữ / Choose language");
+        builder.setSingleChoiceItems(languages, checkedItem, null);
+
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+            if (selectedPosition == -1) selectedPosition = 0;
+
+            setLocale(languageCodes[selectedPosition]);
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    private void setLocale(String langCode) {
+        Locale locale = new Locale(langCode);
+        Locale.setDefault(locale);
+        android.content.res.Configuration config = new android.content.res.Configuration();
+        config.setLocale(locale);
+
+        // For API 24 and above
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            getApplicationContext().createConfigurationContext(config);
+        } else {
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        prefs.edit().putString("app_lang", langCode).apply();
+        Intent intent = new Intent(this, MainActivity.class);
+        for(ConnectedDevice device:tbKetnois){
+            if (device.getDevice() != null) {
+                BleManager.getInstance().disconnect(device.getDevice());
+            }
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    public static Context updateLocale(Context context, String langCode) {
+        Locale locale = new Locale(langCode);
+        Locale.setDefault(locale);
+
+        Configuration config = context.getResources().getConfiguration();
+        config.setLocale(locale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return context.createConfigurationContext(config);
+        } else {
+            context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
+            return context;
+        }
     }
 
     private void hienThiFile(View view) {
@@ -488,27 +557,27 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     public void showSaveDialog(Context context) {
         // Tạo AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Lưu file");
+        builder.setTitle(getString(R.string.luu_file));
 
         // Tạo EditText để nhập tên file
         final EditText input = new EditText(context);
-        input.setHint("Nhập tên file");
+        input.setHint(getString(R.string.nhap_ten_file));
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
         // Nút Lưu
-        builder.setPositiveButton("Lưu", (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.luu), (dialog, which) -> {
             String fileName = input.getText().toString().trim();
             if (!fileName.isEmpty()) {
                 // Gọi phương thức lưu file Excel
                 exportToExcel(context, fileName, allRuns);
             } else {
-                Toast.makeText(context, "Tên file không được để trống", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, getString(R.string.ten_file_khong_hop_le), Toast.LENGTH_SHORT).show();
             }
         });
 
         // Nút Hủy
-        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.cancel());
 
         builder.show();
     }
@@ -533,7 +602,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         for (int i = 0; i < runList.size(); i++) {
             sheet.addMergedRegion(new CellRangeAddress(0, 0, col, col + groupSize - 1));
             Cell cell = headerRow1.createCell(col);
-            cell.setCellValue("Chạy " + runList.get(i).getRunNumber());
+            cell.setCellValue(getString(R.string.run_history) + " " + runList.get(i).getRunNumber());
             col += groupSize;
         }
         Row headerRow2 = sheet.createRow(1);
@@ -587,12 +656,12 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             outputStream.flush();           // thêm dòng này để đảm bảo dữ liệu được đẩy ra file
             outputStream.close();           // đóng stream ghi trước
             workbook.close();               // rồi mới đóng workbook (nội bộ POI cleanup)
-            Toast.makeText(context, "Đã lưu file tại: " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, getString(R.string.da_luu_file_tai) + " " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
             Log.d("EXPORT", "Đã lưu file tại: " + file.getAbsolutePath());
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Lỗi khi lưu file", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, getString(R.string.loi_luu_file), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -604,7 +673,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             String[] fileNames = Arrays.stream(files).map(File::getName).toArray(String[]::new);
 
             new AlertDialog.Builder(context)
-                    .setTitle("Chọn file để mở")
+                    .setTitle(getString(R.string.chon_file_de_mo))
                     .setItems(fileNames, (dialog, which) -> {
                         File selectedFile = new File(downloadsDir, fileNames[which]);
                         // Gọi hàm đọc file
@@ -619,7 +688,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
                     })
                     .show();
         } else {
-            Toast.makeText(this, "Không tìm thấy file Excel nào", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.khong_thay_file_nao), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1177,7 +1246,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
         EventBus.getDefault().post(new DataEvent(dulieuCB));
 
-        btnStart.setText("Dừng Lại");
+        btnStart.setText(getString(R.string.stop_button));
         int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
         btnStart.setBackgroundColor(colorDo);
         btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);
@@ -1226,17 +1295,16 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 //                                Log.d("dulieu", String.valueOf(data[i]));
 //                            }
                             if (bleDevice.getName().substring(0, vitri).equals("V&A") && data.length >= 10) {
-                                xuLyApVaDong(data,bleDevice);
+                                xuLyApVaDong(data, bleDevice);
 
                             } else if (bleDevice.getName().substring(0, vitri).equals("P&T") && data.length >= 10) {
                                 xuLyApSuatVaNhietDo(data, bleDevice);
 
                             } else if (bleDevice.getName().substring(0, vitri).equals("H&T") && data.length >= 10) {
-                                xuLyDoAmVaNhietDo(data,bleDevice);
-                            }else if (bleDevice.getName().substring(0,vitri).equals("SoundF")){
+                                xuLyDoAmVaNhietDo(data, bleDevice);
+                            } else if (bleDevice.getName().substring(0, vitri).equals("SoundF")) {
                                 xuLyAmthanh(data, bleDevice);
-                            }
-                            else {
+                            } else {
                                 int vtrithietbi = 0;
                                 for (int i = 0; i < sodoCambienList.size(); i++) {
                                     if (sodoCambienList.get(i).getBleDevice() == bleDevice) {
@@ -1263,6 +1331,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             });
         }
     }
+
     private void xuLyApVaDong(byte[] data, BleDevice bleDevice) {
         List<Float> mangAp = new ArrayList<>();
         List<Float> mangDong = new ArrayList<>();
@@ -1307,6 +1376,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         postDataEvent(bleDevice, Uuid.Humid, mangDoam);
         postDataEvent(bleDevice, Uuid.Temp, mangNhietdo);
     }
+
     private void xuLyAmthanh(byte[] data, BleDevice bleDevice) {
         List<Float> mangAmthanh = new ArrayList<>();
         for (int i = 0; i < (data.length - 3) / 4; i++) {
@@ -1314,9 +1384,9 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             mangAmthanh.add(amthanh);
         }
         int packIndex = data[1];
-        if(packIndex == 20){
+        if (packIndex == 20) {
             postDataEvent(bleDevice, Uuid.Frequency, mangAmthanh);
-        }else{
+        } else {
             postDataEvent(bleDevice, String.valueOf(data[1]), mangAmthanh);
 
         }
@@ -1337,6 +1407,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         DulieuCB dulieu = new DulieuCB(bleDevice.getName(), tencambien, values);
         EventBus.getDefault().post(new DataEvent(dulieu));
     }
+
     private void handleStopBLE() {
         // All logic for stopping BLE
         // (move code from btnStart's BLE stop block here)
@@ -1371,7 +1442,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         DulieuCB dulieuCB = new DulieuCB("lanchay", "lanchay", manglanchay);
         EventBus.getDefault().post(new DataEvent(dulieuCB));
 
-        btnStart.setText("Dừng Lại");
+        btnStart.setText(getString(R.string.stop_button));
         int colorDo = ContextCompat.getColor(getBaseContext(), R.color.btnStop);
         btnStart.setBackgroundColor(colorDo);
         btnStart.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_stop, 0, 0, 0);

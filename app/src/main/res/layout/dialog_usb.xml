@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <TextView
-            android:text="Giao Diện Kết Nối Cảm Biến"
+            android:text="@string/giao_dien_ket_noi_cam_bien"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:gravity="center"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content">
             <Button
                 android:id="@+id/buttonScan_dialogUsb"
-                android:text="Scan"
+                android:text="@string/quet"
                 android:backgroundTint="@color/xanhduongnhat"
                 android:textColor="@color/black"
                 android:layout_marginLeft="10dp"

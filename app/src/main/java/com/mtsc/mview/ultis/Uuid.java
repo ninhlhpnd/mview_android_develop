@@ -1,5 +1,7 @@
 package com.mtsc.mview.ultis;
 
+import android.content.Context;
+
 import com.mtsc.mview.R;
 import com.mtsc.mview.model.CamBien;
 
@@ -122,23 +124,26 @@ public class Uuid {
             R.drawable.distance,R.drawable.conductivity,R.drawable.dongap,R.drawable.anhsang };
 
     public static List<CamBien> camBiens=new ArrayList<>();
-    static {
-        camBiens.add(new CamBien("Temp", Temp, dvTemp, iconDevice[0], hesoTemp, tansoTemp, daiDoTemp));
-        camBiens.add(new CamBien("Humid", Humid, dvHumid, iconDevice[1], hesoHumid, tansoHumid, daiDoHumid));
-        camBiens.add(new CamBien("Pressure", Pressure, dvPressure, iconDevice[2], hesoPressure, tansoPressure, daiDoPressure));
-        camBiens.add(new CamBien("Oxygen", Oxygen, dvOxygen, iconDevice[3], hesoOxygen, tansoOxygen, daiDoOxygen));
-        camBiens.add(new CamBien("CO2", CO2, dvCO2, iconDevice[4], hesoCO2, tansoCO2, daiDoCO2));
-        camBiens.add(new CamBien("SoundI", SoundI, dvSoundI, iconDevice[5], hesoSoundI, tansoSoundI, daiDoSoundI));
-        camBiens.add(new CamBien("PH", PH, dvPH, iconDevice[6], hesoPH, tansoPH, daiDoPH));
-        camBiens.add(new CamBien("Salinity", Salinity, dvSalinity, iconDevice[7], hesoSalinity, tansoSalinity, daiDoSalinity));
-        camBiens.add(new CamBien("DissolveOxy", DissolveOxy, dvDissolveOxy, iconDevice[8], hesoDissolveOxy, tansoDissolveOxy, daiDoDissolveOxy));
-        camBiens.add(new CamBien("Force", Force, dvForce, iconDevice[9], hesoForce, tansoForce, daiDoForce));
-        camBiens.add(new CamBien("Current", Current, dvCurrent, iconDevice[10], hesoCurrent, tansoCurrent, daiDoCurrent));
-        camBiens.add(new CamBien("Voltage", Voltage, dvVoltage, iconDevice[11], hesoVoltage, tansoVoltage, daiDoVoltage));
-        camBiens.add(new CamBien("SoundF", Frequency, dvFrequency, iconDevice[12], hesoFrequency, tansoFrequency, daiDoFrequency));
-        camBiens.add(new CamBien("Distance", Vitri, dvVitri, iconDevice[13], hesoVitri, tansoVitri, daiDoVitri));
-        camBiens.add(new CamBien("Conductivity", Dodan, dvDodan, iconDevice[14], hesoDodan, tansoDodan, daiDoDodan));
-        camBiens.add(new CamBien("V&A", "Dòng Áp", null, iconDevice[15], null, null, daiDoDodan));
-        camBiens.add(new CamBien("Light", Dosang, dvDosang, iconDevice[16], hesoDosang, tansoDosang, daiDoDosang));
+    public static void initSensors(Context context) {
+        camBiens.clear();
+
+        camBiens.add(new CamBien("Temp", context.getString(R.string.nhiet_do), dvTemp, R.drawable.temp, hesoTemp, tansoTemp, daiDoTemp));
+        camBiens.add(new CamBien("Humid", context.getString(R.string.do_am), dvHumid, R.drawable.humid, hesoHumid, tansoHumid, daiDoHumid));
+        camBiens.add(new CamBien("Pressure", context.getString(R.string.ap_suat), dvPressure, R.drawable.pressure, hesoPressure, tansoPressure, daiDoPressure));
+        camBiens.add(new CamBien("Oxygen", context.getString(R.string.nong_do_oxy), dvOxygen, R.drawable.oxygen, hesoOxygen, tansoOxygen, daiDoOxygen));
+        camBiens.add(new CamBien("CO2", context.getString(R.string.nong_do_co2), dvCO2, R.drawable.co2, hesoCO2, tansoCO2, daiDoCO2));
+        camBiens.add(new CamBien("SoundI", context.getString(R.string.am_thanh), dvSoundI, R.drawable.soundi, hesoSoundI, tansoSoundI, daiDoSoundI));
+        camBiens.add(new CamBien("PH", context.getString(R.string.nong_do_ph), dvPH, R.drawable.ph, hesoPH, tansoPH, daiDoPH));
+        camBiens.add(new CamBien("Salinity", context.getString(R.string.nong_do_muoi), dvSalinity, R.drawable.salinity, hesoSalinity, tansoSalinity, daiDoSalinity));
+        camBiens.add(new CamBien("DissolveOxy", context.getString(R.string.nong_do_oxy_trong_nuoc), dvDissolveOxy, R.drawable.dissolved, hesoDissolveOxy, tansoDissolveOxy, daiDoDissolveOxy));
+        camBiens.add(new CamBien("Force", context.getString(R.string.luc), dvForce, R.drawable.force, hesoForce, tansoForce, daiDoForce));
+        camBiens.add(new CamBien("Current", context.getString(R.string.dong_dien), dvCurrent, R.drawable.current, hesoCurrent, tansoCurrent, daiDoCurrent));
+        camBiens.add(new CamBien("Voltage", context.getString(R.string.dien_ap), dvVoltage, R.drawable.voltage, hesoVoltage, tansoVoltage, daiDoVoltage));
+        camBiens.add(new CamBien("SoundF", Frequency, dvFrequency, R.drawable.soundf, hesoFrequency, tansoFrequency, daiDoFrequency));
+        camBiens.add(new CamBien("Distance", context.getString(R.string.vi_tri), dvVitri, R.drawable.distance, hesoVitri, tansoVitri, daiDoVitri));
+        camBiens.add(new CamBien("Conductivity", context.getString(R.string.do_dan), dvDodan, R.drawable.conductivity, hesoDodan, tansoDodan, daiDoDodan));
+        camBiens.add(new CamBien("V&A", "Dòng áp", null, R.drawable.dongap, null, null, daiDoDodan));
+        camBiens.add(new CamBien("Light", context.getString(R.string.do_sang), dvDosang, R.drawable.anhsang, hesoDosang, tansoDosang, daiDoDosang));
     }
+
 }

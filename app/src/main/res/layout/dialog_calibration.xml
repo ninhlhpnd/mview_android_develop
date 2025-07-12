@@ -4,30 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:text="HIỆU CHỈNH CẢM BIẾN"
+        android:text="@string/hieu_chinh_cam_bien"
         android:layout_gravity="center"
         android:textSize="25sp"
         android:textColor="@color/btnStop"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="300dp"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
-            android:hint="Chọn Cảm Biến"
+            android:hint="@string/chon_cam_bien"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
             <AutoCompleteTextView
-                android:layout_width="300dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
-                android:id="@+id/textviewCalibSensor"/>
+                android:id="@+id/textviewCalibSensor"
+                android:focusable="false"
+                android:clickable="true"/>
         </com.google.android.material.textfield.TextInputLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
     <LinearLayout
         android:weightSum="10"
         android:layout_width="match_parent"
@@ -38,7 +35,7 @@
             android:orientation="vertical"
             android:layout_height="match_parent">
             <TextView
-                android:text="Hiệu chỉnh 1 điểm"
+                android:text="@string/hieu_chinh_1_diem"
                 android:textColor="@color/xanh"
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
@@ -60,7 +57,7 @@
                         android:id="@+id/textviewCalib1"
                         android:textSize="15sp"
                         android:textColor="@color/black"
-                        android:hint="Nhập vào số"
+                        android:hint="@string/nhap_vao_so"
                         android:inputType="numberDecimal"
                         android:background="@drawable/borderedt"
                         android:layout_gravity="center"
@@ -97,7 +94,7 @@
             android:orientation="vertical"
             android:layout_height="match_parent">
             <TextView
-                android:text="Hiệu chỉnh 2 điểm"
+                android:text="@string/hieu_chinh_2_diem"
                 android:textColor="@color/xanh"
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
@@ -119,7 +116,7 @@
                         android:id="@+id/textviewCalib21"
                         android:textSize="15sp"
                         android:textColor="@color/black"
-                        android:hint="Nhập vào số"
+                        android:hint="@string/nhap_vao_so"
                         android:inputType="text"
                         android:background="@drawable/borderedt"
                         android:layout_gravity="center"
@@ -148,7 +145,7 @@
                         android:id="@+id/textviewCalib22"
                         android:textSize="15sp"
                         android:textColor="@color/black"
-                        android:hint="Nhập vào số"
+                        android:hint="@string/nhap_vao_so"
                         android:inputType="text"
                         android:background="@drawable/borderedt"
                         android:layout_gravity="center"
@@ -163,7 +160,6 @@
                         android:textSize="12sp"
                         android:layout_marginLeft="5dp"
                         android:enabled="false"
-
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>

@@ -7,7 +7,7 @@
     android:layout_height="wrap_content">
     <TextView
         android:background="@drawable/textview_custom"
-        android:text="Phân Tích"
+        android:text="@string/phan_tich"
         android:gravity="center"
         android:textSize="20sp"
         android:textColor="@color/white"
@@ -27,7 +27,7 @@
 <!--            android:layout_width="30dp"-->
 <!--            android:layout_height="30dp"/>-->
         <TextView
-            android:text="Tọa độ"
+            android:text="@string/toa_do"
             android:textSize="18sp"
             android:layout_marginLeft="5dp"
             android:textColor="@color/black"
@@ -59,7 +59,7 @@
 <!--            android:layout_width="30dp"-->
 <!--            android:layout_height="30dp"/>-->
         <TextView
-            android:text="Chênh lệch"
+            android:text="@string/chenh_lech"
             android:layout_marginLeft="5dp"
             android:textSize="18sp"
             android:textColor="@color/black"
@@ -91,7 +91,7 @@
 <!--            android:layout_width="30dp"-->
 <!--            android:layout_height="30dp"/>-->
         <TextView
-            android:text="Độ dốc"
+            android:text="@string/do_doc"
             android:layout_marginLeft="5dp"
             android:textSize="18sp"
             android:textColor="@color/black"
@@ -119,7 +119,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <TextView
-            android:text="Trung bình"
+            android:text="@string/trung_binh"
             android:layout_marginLeft="5dp"
             android:textSize="18sp"
             android:textColor="@color/black"
@@ -147,7 +147,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <TextView
-            android:text="RMS"
+            android:text="@string/rms"
             android:layout_marginLeft="5dp"
             android:textSize="18sp"
             android:textColor="@color/black"
@@ -175,7 +175,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
         <TextView
-            android:text="Hàm bậc 2"
+            android:text="@string/ham_bac2"
             android:layout_marginLeft="5dp"
             android:textSize="18sp"
             android:textColor="@color/black"
