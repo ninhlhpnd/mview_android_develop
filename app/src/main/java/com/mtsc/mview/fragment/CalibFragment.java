@@ -84,7 +84,7 @@ public class CalibFragment extends DialogFragment {
         edtCalib22 = (EditText) view.findViewById(R.id.textviewCalib22);
         stringConDevice = new String[MainActivity.tbKetnois.size()];
         checkedItems = new boolean[MainActivity.tbKetnois.size()];
-        listHieuchinh=new ArrayList<>();
+        listHieuchinh = new ArrayList<>();
         for (int i = 0; i < MainActivity.tbKetnois.size(); i++) {
             BleDevice device = tbKetnois.get(i).getDevice();
             stringConDevice[i] = device.getName();
@@ -115,7 +115,7 @@ public class CalibFragment extends DialogFragment {
                 listHieuchinh.clear();
                 selectedItems.clear();
                 for (int i = 0; i < stringConDevice.length; i++) {
-                    if (checkedItems[i]){
+                    if (checkedItems[i]) {
                         listHieuchinh.add(tbKetnois.get(i));
                         selectedItems.add(stringConDevice[i]);
                     }
@@ -151,19 +151,20 @@ public class CalibFragment extends DialogFragment {
                         byteArray[1] = 0x01;
                         byteArray[6] = 0x03;
                         System.arraycopy(reversedArray, 0, byteArray, 2, tempArray.length);
-                        ConnectedDevice device = MainActivity.tbKetnois.get(vitri);
-                        BleManager.getInstance().write(device.getDevice(),
-                                device.getServiceUuid(), device.getReadUuid(), byteArray, new BleWriteCallback() {
-                                    @Override
-                                    public void onWriteSuccess(int current, int total, byte[] justWrite) {
-                                        Toast.makeText(view.getContext(), getContext().getString(R.string.hieu_chinh_tai_diem) + " " + value, Toast.LENGTH_SHORT).show();
-                                    }
+                        for (ConnectedDevice device : listHieuchinh) {
+                            BleManager.getInstance().write(device.getDevice(),
+                                    device.getServiceUuid(), device.getReadUuid(), byteArray, new BleWriteCallback() {
+                                        @Override
+                                        public void onWriteSuccess(int current, int total, byte[] justWrite) {
+                                            Toast.makeText(view.getContext(), getContext().getString(R.string.hieu_chinh_tai_diem) + " " + value, Toast.LENGTH_SHORT).show();
+                                        }
 
-                                    @Override
-                                    public void onWriteFailure(BleException exception) {
+                                        @Override
+                                        public void onWriteFailure(BleException exception) {
 
-                                    }
-                                });
+                                        }
+                                    });
+                        }
                     } else if (trangThai == TrangThaiKetNoi.USB) {
                         int tenCambien = Uuid.camBiens.indexOf(MainActivity.tbScansUsb.get(0).getCamBien()) + 1;
                         int idCambien = MainActivity.tbScansUsb.get(0).getId();
